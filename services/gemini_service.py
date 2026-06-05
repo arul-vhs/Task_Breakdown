@@ -99,7 +99,7 @@ def analyze_goal_with_gemini(goal_text: str, persona: dict, api_key: str) -> dic
     
     try:
         # Load gemma-4-31b-it as requested
-        model = genai.GenerativeModel("gemma-4-31b-it")
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
         
         # Enforce JSON output mode in Gemini API
         response = model.generate_content(
