@@ -2,28 +2,32 @@ import streamlit as st
 import datetime
 from services.gemini_service import get_api_key, analyze_goal_with_gemini
 
-# Initialize Goal Intake session states
-if "goal_submitted" not in st.session_state:
-    st.session_state.goal_submitted = False
-if "goal_analysis" not in st.session_state:
-    st.session_state.goal_analysis = {}
-if "goal_questions" not in st.session_state:
-    st.session_state.goal_questions = []
-if "goal_answers" not in st.session_state:
-    st.session_state.goal_answers = {}
-if "goal_q_step" not in st.session_state:
-    st.session_state.goal_q_step = 1
-if "goal_context" not in st.session_state:
-    st.session_state.goal_context = None
-if "goal_text" not in st.session_state:
-    st.session_state.goal_text = ""
-if "custom_api_key" not in st.session_state:
-    st.session_state.custom_api_key = ""
+def initialize_goal_state():
+    """
+    Ensures all goal intake session state variables are initialized.
+    """
+    if "goal_submitted" not in st.session_state:
+        st.session_state.goal_submitted = False
+    if "goal_analysis" not in st.session_state:
+        st.session_state.goal_analysis = {}
+    if "goal_questions" not in st.session_state:
+        st.session_state.goal_questions = []
+    if "goal_answers" not in st.session_state:
+        st.session_state.goal_answers = {}
+    if "goal_q_step" not in st.session_state:
+        st.session_state.goal_q_step = 1
+    if "goal_context" not in st.session_state:
+        st.session_state.goal_context = None
+    if "goal_text" not in st.session_state:
+        st.session_state.goal_text = ""
+    if "custom_api_key" not in st.session_state:
+        st.session_state.custom_api_key = ""
 
 def render_sidebar_api_key():
     """
     Renders an API key input in the sidebar if not resolved from system .env / secrets.
     """
+    initialize_goal_state()
     resolved_key = get_api_key()
     
     if not resolved_key:
