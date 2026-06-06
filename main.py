@@ -6,6 +6,8 @@ from agents.goal_agent import render_goal_intake_module
 from agents.strategy_agent import render_strategy_agent
 from agents.strategy_validation_agent import render_strategy_validation_agent
 from agents.execution_blueprint_agent import render_execution_blueprint_agent
+from agents.scheduling_agent import render_scheduling_agent
+from utils.state_persistence import load_state_from_cache, save_state_to_cache
 
 # Set page configuration
 st.set_page_config(
@@ -14,6 +16,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Load state cache if available
+load_state_from_cache()
 
 # Custom premium CSS injection
 st.html(
@@ -413,6 +418,9 @@ elif st.session_state.app_phase == "strategy_validation":
 elif st.session_state.app_phase == "execution_blueprint":
     render_execution_blueprint_agent()
 
+elif st.session_state.app_phase == "scheduling":
+    render_scheduling_agent()
+
 elif st.session_state.app_phase == "progress_tracking":
     st.html(
         """
@@ -428,6 +436,9 @@ elif st.session_state.app_phase == "progress_tracking":
     )
     col1, col2, col3 = st.columns([1, 1.2, 1])
     with col2:
-        if st.button("🔄 Back to Roadmap & Checklist Workspace", use_container_width=True, type="secondary"):
-            st.session_state.app_phase = "execution_blueprint"
+        if st.button("🔄 Back to Scheduling Workspace", use_container_width=True, type="secondary"):
+            st.session_state.app_phase = "scheduling"
             st.rerun()
+
+# Automatically save state to cache at the end of the script run
+save_state_to_cache()

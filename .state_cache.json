@@ -1,0 +1,632 @@
+{
+    "app_phase": "scheduling",
+    "onboarding_started": true,
+    "current_step": 6,
+    "profile_data": {
+        "user_type": "Developer",
+        "experience_level": "Intermediate",
+        "hours_per_week": 10,
+        "work_style": "Quick Wins",
+        "motivation_style": "Achievements",
+        "biggest_challenge": "Lack of Time"
+    },
+    "completed": true,
+    "goal_submitted": true,
+    "goal_analysis": {
+        "category": "Robotics and Artificial Intelligence",
+        "difficulty": "Advanced",
+        "estimated_duration": "Multi-year phased approach",
+        "required_skills": [
+            "Mechatronics and Actuation",
+            "Neural Network Architecture",
+            "Material Science (Biomimicry)",
+            "Cognitive Psychology",
+            "Control Theory"
+        ],
+        "risks": [
+            "Extreme technical complexity leading to project stagnation",
+            "Loss of momentum due to the immense gap between initial curiosity and long-term execution",
+            "Tendency to pivot to new, interesting sub-components before completing the core functional chassis",
+            "Failure to maintain a consistent daily development cadence over several years",
+            "Burnout resulting from attempting to tackle a massive goal without fragmented, manageable milestones"
+        ]
+    },
+    "goal_questions": [
+        "Are you aiming to build a physical humanoid robot, a digital simulation of human consciousness, or a synthetic biological entity?",
+        "What is your current technical proficiency in robotics or AI, and which specific human capability (e.g., locomotion, emotive speech, reasoning) is your primary objective?",
+        "Because this project is vast, what is the smallest possible 'micro-win' you can achieve in the first 30 days to build a streak of consistency?",
+        "How will you structure your environment to minimize the friction of starting your work each day, ensuring your 'Explorer' curiosity doesn't lead you away from the critical path?",
+        "What specific hardware or software framework (e.g., ROS, PyTorch, custom alloys) are you planning to utilize, and how will you track your incremental progress to avoid feeling overwhelmed?"
+    ],
+    "goal_answers": {
+        "0": "idk",
+        "1": "idk",
+        "2": "idk",
+        "3": "idk",
+        "4": "idk"
+    },
+    "goal_q_step": 5,
+    "goal_context": {
+        "goal": "build human",
+        "category": "Robotics and Artificial Intelligence",
+        "difficulty": "Advanced",
+        "estimated_duration": "Multi-year phased approach",
+        "required_skills": [
+            "Mechatronics and Actuation",
+            "Neural Network Architecture",
+            "Material Science (Biomimicry)",
+            "Cognitive Psychology",
+            "Control Theory"
+        ],
+        "risks": [
+            "Extreme technical complexity leading to project stagnation",
+            "Loss of momentum due to the immense gap between initial curiosity and long-term execution",
+            "Tendency to pivot to new, interesting sub-components before completing the core functional chassis",
+            "Failure to maintain a consistent daily development cadence over several years",
+            "Burnout resulting from attempting to tackle a massive goal without fragmented, manageable milestones"
+        ],
+        "qa_context": [
+            {
+                "question": "Are you aiming to build a physical humanoid robot, a digital simulation of human consciousness, or a synthetic biological entity?",
+                "answer": "idk"
+            },
+            {
+                "question": "What is your current technical proficiency in robotics or AI, and which specific human capability (e.g., locomotion, emotive speech, reasoning) is your primary objective?",
+                "answer": "idk"
+            },
+            {
+                "question": "Because this project is vast, what is the smallest possible 'micro-win' you can achieve in the first 30 days to build a streak of consistency?",
+                "answer": "idk"
+            },
+            {
+                "question": "How will you structure your environment to minimize the friction of starting your work each day, ensuring your 'Explorer' curiosity doesn't lead you away from the critical path?",
+                "answer": "idk"
+            },
+            {
+                "question": "What specific hardware or software framework (e.g., ROS, PyTorch, custom alloys) are you planning to utilize, and how will you track your incremental progress to avoid feeling overwhelmed?",
+                "answer": "idk"
+            }
+        ],
+        "timestamp": "2026-06-06T16:24:13"
+    },
+    "custom_api_key": "AQ.Ab8RN6Kf5hjhCtbXK2v3i8JAwCq4lmIEfFs82I8tnSHL3RGYwg",
+    "selected_strategy_data": {
+        "key": "fast_mvp",
+        "name": "The Digital Soul Prototype",
+        "description": "Instead of physical hardware, focus exclusively on a digital 'human' simulation. Build a narrow AI agent using an LLM integrated with a simple virtual avatar (like Unity or Unreal Engine) that can perform one specific human-like cognitive task, such as emotive conversation or basic decision-making in a virtual environment.",
+        "pros": [
+            "Provides immediate 'Quick Wins' which align with the user's motivation style",
+            "Eliminates the high cost and friction of physical mechatronics",
+            "Fits perfectly within a strict 10-hour weekly time limit"
+        ],
+        "cons": [
+            "Does not result in a physical entity",
+            "May feel like a pivot away from the 'robotics' aspect of the goal"
+        ],
+        "estimated_duration": "2 months",
+        "effort_level": "Low"
+    },
+    "strategy_validation": {
+        "scores": {
+            "skill_readiness": 10,
+            "resource_readiness": 10,
+            "time_readiness": 20,
+            "overall_readiness": 13
+        },
+        "feedback": {
+            "strengths": [
+                "The user has selected a strategic simplification (Digital Soul) which reduces the project's complexity from physical robotics to a software simulation."
+            ],
+            "weaknesses": [
+                "Complete absence of a technical implementation plan for the LLM-to-Animation pipeline.",
+                "Lack of specified tools or frameworks for 3D asset management.",
+                "No defined 'Definition of Done', making the project highly susceptible to scope creep.",
+                "Severe gap between the ambition of the goal and the current preparation level."
+            ],
+            "potential_risks": [
+                "Analysis Paralysis: The 'idk' responses suggest the user is overwhelmed or hasn't researched the requirements, leading to a high probability of project abandonment.",
+                "Time Sink: Without a visual boundary, the user is likely to spend their limited 10 hours/week on aesthetic tweaking rather than core AI logic.",
+                "Rapid Demotivation: The friction of starting from zero knowledge on the pipeline may lead to immediate loss of momentum."
+            ],
+            "recommendations": [
+                "Immediately adopt 'Ready Player Me' for the avatar to bypass all 3D modeling and rigging hurdles.",
+                "Use a middleware or simple script that maps LLM sentiment tags (e.g., [HAPPY], [SAD]) to pre-baked animation triggers rather than attempting a complex real-time system.",
+                "Set a strict 'Visual Deadline' of 1 week: if the avatar isn't moving by Day 7, revert to a 2D representation to protect the 2-month timeline.",
+                "Define the MVP as: 'A character that can trigger one of three emotions based on a text prompt' to prevent endless tweaking."
+            ]
+        },
+        "answers": [
+            {
+                "question": "How do you plan to translate the LLM's text outputs into specific emotive animations for the avatar without getting bogged down in manual rigging or complex animation timelines?",
+                "answer": "idk"
+            },
+            {
+                "question": "Which specific 3D asset pipeline or character framework (e.g., Unreal MetaHumans, Ready Player Me) will you use to ensure you don't spend your limited time building a 3D model from scratch?",
+                "answer": "idk"
+            },
+            {
+                "question": "Given your 10-hour weekly limit, what is your specific 'definition of done' for the visual component to prevent the 'Quick Win' preference from turning into a time-sink of endless aesthetic tweaking?",
+                "answer": "idk"
+            }
+        ],
+        "timestamp": "2026-06-06T16:27:07"
+    },
+    "roadmap_dag_data": {
+        "roadmap_name": "Digital Soul Prototype: AI-Driven Virtual Human",
+        "summary": "A streamlined 8-week execution plan to build a digital human simulation. This roadmap prioritizes rapid visual wins using Ready Player Me and a sentiment-tagging system to connect a Large Language Model (LLM) to a 3D avatar, avoiding the complexity of physical robotics and custom 3D modeling.",
+        "phases": [
+            {
+                "phase_number": 1,
+                "name": "Rapid Visual Prototyping",
+                "duration": "Week 1",
+                "objective": "Establish a visible 3D presence to prevent analysis paralysis and meet the 'Visual Deadline'.",
+                "milestone": "A rigged 3D avatar capable of playing basic animations in a game engine.",
+                "success_criteria": "Avatar is imported into Unity/Unreal and can switch between at least two animation states (e.g., Idle and Talking).",
+                "tasks": [
+                    {
+                        "task_id": "T1_1",
+                        "name": "Avatar Creation & Export",
+                        "description": "Use Ready Player Me to create a standardized humanoid avatar to bypass modeling and rigging.",
+                        "priority": "High",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 2,
+                        "dependencies": [],
+                        "task_type": "Setup",
+                        "subtasks": [
+                            "Create a free Ready Player Me account",
+                            "Customize a humanoid avatar based on desired aesthetic",
+                            "Export the avatar as a .glb or .fbx file",
+                            "Verify the export contains standard humanoid rigging"
+                        ]
+                    },
+                    {
+                        "task_id": "T1_2",
+                        "name": "Engine Environment Setup",
+                        "description": "Set up the 3D environment (Unity or Unreal Engine) for the simulation.",
+                        "priority": "High",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 3,
+                        "dependencies": [],
+                        "task_type": "Infrastructure",
+                        "subtasks": [
+                            "Install Unity (LTS) or Unreal Engine 5",
+                            "Create a new 3D project with a basic floor and lighting",
+                            "Import the Ready Player Me avatar into the scene",
+                            "Configure the avatar's materials and textures"
+                        ]
+                    },
+                    {
+                        "task_id": "T1_3",
+                        "name": "Animation Library Integration",
+                        "description": "Implement pre-baked animations for basic human expressions.",
+                        "priority": "Medium",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 3,
+                        "dependencies": [
+                            "T1_1",
+                            "T1_2"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Download 3-5 basic animations (Idle, Happy, Sad, Talking) from Mixamo",
+                            "Retarget animations to the Ready Player Me humanoid rig",
+                            "Set up an Animation Controller/State Machine",
+                            "Test manual triggers for each animation in the editor"
+                        ]
+                    },
+                    {
+                        "task_id": "T1_4",
+                        "name": "Visual Deadline Validation",
+                        "description": "Strict checkpoint to ensure a visual representation exists before moving to logic.",
+                        "priority": "High",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 2,
+                        "dependencies": [
+                            "T1_3"
+                        ],
+                        "task_type": "Validation",
+                        "subtasks": [
+                            "Verify avatar renders correctly in a standalone build",
+                            "Confirm animations trigger without crashing the engine",
+                            "Document the current visual state",
+                            "Decision Gate: If failed, pivot to 2D representation immediately"
+                        ]
+                    }
+                ]
+            },
+            {
+                "phase_number": 2,
+                "name": "The Digital Brain",
+                "duration": "Weeks 2-3",
+                "objective": "Develop the AI logic layer that generates emotive text responses.",
+                "milestone": "A functional LLM API wrapper that returns structured sentiment-tagged text.",
+                "success_criteria": "The system consistently returns responses in the format: '[EMOTION] Text response'.",
+                "tasks": [
+                    {
+                        "task_id": "T2_1",
+                        "name": "LLM API Integration",
+                        "description": "Set up the connection to a foundation model (OpenAI GPT-4 or Anthropic Claude).",
+                        "priority": "High",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 4,
+                        "dependencies": [
+                            "T1_4"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Obtain API keys for the chosen LLM provider",
+                            "Implement a basic HTTP client in Python or C#",
+                            "Create a request/response handler for chat completions",
+                            "Test API connectivity with simple 'Hello World' prompts"
+                        ]
+                    },
+                    {
+                        "task_id": "T2_2",
+                        "name": "Sentiment-Driven Prompt Engineering",
+                        "description": "Instruct the LLM to output emotive tags for the animation system.",
+                        "priority": "High",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 6,
+                        "dependencies": [
+                            "T2_1"
+                        ],
+                        "task_type": "AI Tuning",
+                        "subtasks": [
+                            "Draft a system prompt defining the 'human' persona",
+                            "Define a strict output schema: [HAPPY], [SAD], [NEUTRAL], [THINKING]",
+                            "Implement few-shot prompting examples to enforce tag usage",
+                            "Iterate on prompts to minimize 'chatty' AI behavior and maximize tag accuracy"
+                        ]
+                    },
+                    {
+                        "task_id": "T2_3",
+                        "name": "Input/Output Wrapper",
+                        "description": "Build a lightweight interface to test the brain independently of the 3D engine.",
+                        "priority": "Medium",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 5,
+                        "dependencies": [
+                            "T2_2"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Create a simple CLI or web-based chat interface",
+                            "Implement a history buffer to maintain conversation context",
+                            "Add a validation layer to strip or flag malformed tags",
+                            "Log responses for sentiment accuracy auditing"
+                        ]
+                    },
+                    {
+                        "task_id": "T2_4",
+                        "name": "Cognitive Task Definition",
+                        "description": "Narrow the scope to one specific human-like cognitive task.",
+                        "priority": "Medium",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 5,
+                        "dependencies": [
+                            "T2_3"
+                        ],
+                        "task_type": "Planning",
+                        "subtasks": [
+                            "Select a task (e.g., 'Emotive Support' or 'Virtual Guide')",
+                            "Refine system prompt to specialize in this specific task",
+                            "Test the AI's ability to maintain this persona over 10 turns",
+                            "Define success metrics for the cognitive task (e.g., 90% tag accuracy)"
+                        ]
+                    }
+                ]
+            },
+            {
+                "phase_number": 3,
+                "name": "The Animation Bridge",
+                "duration": "Weeks 4-5",
+                "objective": "Map the AI's emotional output to the 3D avatar's physical movements.",
+                "milestone": "An automated system where LLM tags trigger real-time animation changes.",
+                "success_criteria": "The avatar changes its animation state automatically upon receiving a specific tag from the AI.",
+                "tasks": [
+                    {
+                        "task_id": "T3_1",
+                        "name": "Sentiment Parser Implementation",
+                        "description": "Create a parser to extract tags from the LLM string output.",
+                        "priority": "High",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 4,
+                        "dependencies": [
+                            "T2_3"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Write a regex pattern to identify [TAGS] in the text",
+                            "Develop a function to split the tag from the actual message",
+                            "Create a default fallback to [NEUTRAL] if no tag is found",
+                            "Unit test the parser with a set of edge-case strings"
+                        ]
+                    },
+                    {
+                        "task_id": "T3_2",
+                        "name": "Engine-Side Animation Controller",
+                        "description": "Develop the logic within the game engine to handle tag-based triggers.",
+                        "priority": "High",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 6,
+                        "dependencies": [
+                            "T1_3",
+                            "T3_1"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Create a mapping dictionary (e.g., '[HAPPY]' -> 'Anim_Happy')",
+                            "Implement a script to call animation triggers via the State Machine",
+                            "Set up animation blending/cross-fading for smooth transitions",
+                            "Test triggers via a debug console in the engine"
+                        ]
+                    },
+                    {
+                        "task_id": "T3_3",
+                        "name": "Async Communication Pipeline",
+                        "description": "Establish a way for the AI brain (external) to talk to the Engine (local).",
+                        "priority": "High",
+                        "difficulty": "Advanced",
+                        "estimated_hours": 8,
+                        "dependencies": [
+                            "T2_1",
+                            "T3_2"
+                        ],
+                        "task_type": "Infrastructure",
+                        "subtasks": [
+                            "Set up a simple WebSocket or Local HTTP server in the engine",
+                            "Implement a JSON listener to receive {tag: string, text: string}",
+                            "Handle asynchronous timing to prevent engine freezing during API calls",
+                            "Verify end-to-end data flow: Prompt -> LLM -> Parser -> Engine Trigger"
+                        ]
+                    },
+                    {
+                        "task_id": "T3_4",
+                        "name": "Latency Optimization",
+                        "description": "Reduce the gap between the user prompt and the avatar's reaction.",
+                        "priority": "Low",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 2,
+                        "dependencies": [
+                            "T3_3"
+                        ],
+                        "task_type": "Optimization",
+                        "subtasks": [
+                            "Implement a 'Thinking' animation that plays immediately after input",
+                            "Optimize JSON payload size",
+                            "Experiment with streaming responses if applicable",
+                            "Measure and document average response latency"
+                        ]
+                    }
+                ]
+            },
+            {
+                "phase_number": 4,
+                "name": "Integration & Interaction Loop",
+                "duration": "Weeks 6-7",
+                "objective": "Create a seamless user-facing interaction loop.",
+                "milestone": "A fully interactive digital human that responds to text with motion and text.",
+                "success_criteria": "A user can type a message and see the avatar react emotionally and respond in text within 5 seconds.",
+                "tasks": [
+                    {
+                        "task_id": "T4_1",
+                        "name": "In-Engine UI Development",
+                        "description": "Build a simple chat interface within the 3D scene.",
+                        "priority": "Medium",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 5,
+                        "dependencies": [
+                            "T3_3"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Create a text input field and a 'Send' button",
+                            "Implement a scrollable text log for conversation history",
+                            "Style the UI for basic readability",
+                            "Connect the UI input to the AI communication pipeline"
+                        ]
+                    },
+                    {
+                        "task_id": "T4_2",
+                        "name": "TTS (Text-to-Speech) Integration",
+                        "description": "Add a voice to the avatar to enhance the 'human' simulation.",
+                        "priority": "Medium",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 6,
+                        "dependencies": [
+                            "T3_3"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Integrate a TTS API (e.g., ElevenLabs or Google TTS)",
+                            "Route the LLM's text output through the TTS engine",
+                            "Sync the 'Talking' animation with the audio playback duration",
+                            "Test audio clarity and latency"
+                        ]
+                    },
+                    {
+                        "task_id": "T4_3",
+                        "name": "End-to-End Pipeline Testing",
+                        "description": "Rigorous testing of the entire loop from input to voice/motion.",
+                        "priority": "High",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 5,
+                        "dependencies": [
+                            "T4_1",
+                            "T4_2"
+                        ],
+                        "task_type": "Validation",
+                        "subtasks": [
+                            "Conduct 20 varied conversation tests",
+                            "Verify that [HAPPY] prompts actually trigger the happy animation",
+                            "Check for memory leaks or crashes during long sessions",
+                            "Audit the 'Human' feel: does the motion match the tone?"
+                        ]
+                    },
+                    {
+                        "task_id": "T4_4",
+                        "name": "Edge Case Handling",
+                        "description": "Ensure the system doesn't break on weird inputs or API failures.",
+                        "priority": "Medium",
+                        "difficulty": "Intermediate",
+                        "estimated_hours": 4,
+                        "dependencies": [
+                            "T4_3"
+                        ],
+                        "task_type": "Development",
+                        "subtasks": [
+                            "Implement a 'Sorry, I'm thinking...' message for API timeouts",
+                            "Handle empty or null responses from the LLM",
+                            "Add input sanitization to prevent prompt injection",
+                            "Create a 'Reset' button to clear conversation state"
+                        ]
+                    }
+                ]
+            },
+            {
+                "phase_number": 5,
+                "name": "Refinement & Final Validation",
+                "duration": "Week 8",
+                "objective": "Polish the experience and validate against the MVP definition.",
+                "milestone": "A polished MVP demo showcasing a character triggering three distinct emotions.",
+                "success_criteria": "The project meets the MVP definition: 'A character that can trigger one of three emotions based on a text prompt'.",
+                "tasks": [
+                    {
+                        "task_id": "T5_1",
+                        "name": "Visual & Audio Polish",
+                        "description": "Final tweaks to aesthetics and sound for a professional feel.",
+                        "priority": "Low",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 4,
+                        "dependencies": [
+                            "T4_3"
+                        ],
+                        "task_type": "Polish",
+                        "subtasks": [
+                            "Adjust lighting and camera angle for a 'talking head' view",
+                            "Fine-tune animation blend times for more natural transitions",
+                            "Balance TTS volume and voice tone",
+                            "Add a simple background environment"
+                        ]
+                    },
+                    {
+                        "task_id": "T5_2",
+                        "name": "MVP Validation Audit",
+                        "description": "Final check against the project goals and success criteria.",
+                        "priority": "High",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 3,
+                        "dependencies": [
+                            "T5_1"
+                        ],
+                        "task_type": "Validation",
+                        "subtasks": [
+                            "Test specifically for the 3 required emotions (Happy, Sad, Neutral)",
+                            "Verify that the cognitive task is being performed",
+                            "Check that the total build is stable",
+                            "Document any known limitations"
+                        ]
+                    },
+                    {
+                        "task_id": "T5_3",
+                        "name": "Demo Recording & Documentation",
+                        "description": "Capture the results for portfolio or future expansion.",
+                        "priority": "Medium",
+                        "difficulty": "Beginner",
+                        "estimated_hours": 3,
+                        "dependencies": [
+                            "T5_2"
+                        ],
+                        "task_type": "Documentation",
+                        "subtasks": [
+                            "Record a 2-minute video showing the interaction loop",
+                            "Write a brief README explaining the tech stack",
+                            "Document the prompt engineering strategy used",
+                            "Archive the project codebase"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "blueprint_refinement": "Default",
+    "task_depth": "Detailed",
+    "task_completions": {
+        "T1_1_0": false,
+        "T1_1_1": false,
+        "T1_1_2": false,
+        "T1_1_3": false,
+        "T1_2_0": false,
+        "T1_2_1": false,
+        "T1_2_2": false,
+        "T1_2_3": false,
+        "T1_3_0": false,
+        "T1_3_1": false,
+        "T1_3_2": false,
+        "T1_3_3": false,
+        "T1_4_0": false,
+        "T1_4_1": false,
+        "T1_4_2": false,
+        "T1_4_3": false,
+        "T2_1_0": false,
+        "T2_1_1": false,
+        "T2_1_2": false,
+        "T2_1_3": false,
+        "T2_2_0": false,
+        "T2_2_1": false,
+        "T2_2_2": false,
+        "T2_2_3": false,
+        "T2_3_0": false,
+        "T2_3_1": false,
+        "T2_3_2": false,
+        "T2_3_3": false,
+        "T2_4_0": false,
+        "T2_4_1": false,
+        "T2_4_2": false,
+        "T2_4_3": false,
+        "T3_1_0": false,
+        "T3_1_1": false,
+        "T3_1_2": false,
+        "T3_1_3": false,
+        "T3_2_0": false,
+        "T3_2_1": false,
+        "T3_2_2": false,
+        "T3_2_3": false,
+        "T3_3_0": false,
+        "T3_3_1": false,
+        "T3_3_2": false,
+        "T3_3_3": false,
+        "T3_4_0": false,
+        "T3_4_1": false,
+        "T3_4_2": false,
+        "T3_4_3": false,
+        "T4_1_0": false,
+        "T4_1_1": false,
+        "T4_1_2": false,
+        "T4_1_3": false,
+        "T4_2_0": false,
+        "T4_2_1": false,
+        "T4_2_2": false,
+        "T4_2_3": false,
+        "T4_3_0": false,
+        "T4_3_1": false,
+        "T4_3_2": false,
+        "T4_3_3": false,
+        "T4_4_0": false,
+        "T4_4_1": false,
+        "T4_4_2": false,
+        "T4_4_3": false,
+        "T5_1_0": false,
+        "T5_1_1": false,
+        "T5_1_2": false,
+        "T5_1_3": false,
+        "T5_2_0": false,
+        "T5_2_1": false,
+        "T5_2_2": false,
+        "T5_2_3": false,
+        "T5_3_0": false,
+        "T5_3_1": false,
+        "T5_3_2": false,
+        "T5_3_3": false
+    }
+}

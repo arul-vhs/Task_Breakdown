@@ -666,5 +666,138 @@ def get_roadmap_dag_prompt(profile_data: dict, goal_context: dict, strategy: dic
     )
 
 
+def get_scheduling_prompt(profile_data: dict, goal_context: dict, selected_strategy: dict, roadmap_dag_data: dict) -> str:
+    """
+    Constructs a highly structured prompt to generate a personalized weekly and daily schedule
+    along with buffer time allocation, confidence score, and rescheduling suggestions.
+    """
+    # Profile
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    motivation_style = profile_data.get("motivation_style", "Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Goal
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    # Strategy
+    strategy_name = selected_strategy.get("name", "Balanced Growth")
+    strategy_desc = selected_strategy.get("description", "")
+    strategy_duration = selected_strategy.get("estimated_duration", "")
+
+    # Format Roadmap Phases and Tasks for context
+    roadmap_formatted_list = []
+    for phase in roadmap_dag_data.get("phases", []):
+        p_num = phase.get("phase_number", 1)
+        p_name = phase.get("name", "")
+        p_duration = phase.get("duration", "")
+        tasks = []
+        for task in phase.get("tasks", []):
+            tasks.append(
+                f"  - {task.get('task_id')}: {task.get('name')} (Est: {task.get('estimated_hours')} hrs, Priority: {task.get('priority')})"
+            )
+        tasks_str = "\n".join(tasks)
+        roadmap_formatted_list.append(
+            f"Phase {p_num}: {p_name} ({p_duration})\n{tasks_str}"
+        )
+    roadmap_formatted = "\n\n".join(roadmap_formatted_list)
+
+    return textwrap.dedent(
+        f"""
+        You are an elite productivity strategist and dynamic scheduling agent. Your goal is to convert an execution roadmap and task dependency list into a highly structured, realistic weekly and daily schedule.
+
+        === USER PROFILE & COACHING CONTEXT ===
+        - Goal: "{goal}" ({category} • {difficulty} difficulty)
+        - User Archetype: {user_type} ({experience_level} level)
+        - Available hours: {hours_per_week} hours/week
+        - Work Preference style: {work_style}
+        - Main obstacle challenge: {biggest_challenge}
+        - Strategy Choice: {strategy_name} ({strategy_desc} • Timeline: {strategy_duration})
+
+        === EXECUTION ROADMAP & TASKS ===
+        {roadmap_formatted}
+
+        === SCHEDULING CONSTRAINTS & PERSONALIZATION RULES ===
+        1. **Hours Per Week Limit**: You must NOT allocate more than {hours_per_week} hours of work in a single week. 
+        2. **Work Style ({work_style})**:
+           - "Quick Wins": Distribute tasks in short daily blocks (1-2 hours) to maintain dopamine loops.
+           - "Deep Focus": Consolidate hours into larger chunks (3-5 hours) on fewer days (e.g. 2-3 deep days per week).
+           - "Balanced Progress": Smoothly distribute hours across the week (e.g. 1.5-2 hours every day).
+        3. **Experience Level ({experience_level})**:
+           - Beginner: Build in at least 15-20% extra buffer time for learning curves and obstacles.
+           - Advanced: Streamline the scheduling with tight, efficient blocks.
+        4. **Dependencies**: Ensure task order strictly respects the dependencies specified in the roadmap (e.g., don't schedule a task before its dependencies are complete).
+
+        === OUTPUT FORMAT ===
+        Generate a complete Weekly Schedule, Daily Task Allocation, and Schedule Analysis.
+        
+        The `weekly_schedule` should map tasks to each week (Week 1, Week 2, etc.) up to the estimated duration of the strategy.
+        The `daily_schedule` should detail how tasks are scheduled day-by-day (e.g., Monday through Sunday for active days). Include realistic time slots (e.g. "09:00 AM - 11:00 AM") that respect the selected work style.
+        The `schedule_analysis` must include:
+        - `confidence_score` (Integer 0-100) representing how likely the user is to maintain this schedule given their profile and challenge ({biggest_challenge}).
+        - `goal_completion_forecast` (String) predicting the final completion date or duration.
+        - `buffer_time_allocation` (String) explaining where buffers were built in (e.g., "1.5 hours of weekly buffer added on Friday").
+        - `deadline_feasibility_analysis` (String) evaluation of timeline feasibility.
+        - `rescheduling_suggestions` (Array) of exactly 3 actionable rescheduling recommendations if they fall behind.
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        Required JSON structure:
+        {{
+            "weekly_schedule": [
+                {{
+                    "week_number": Integer,
+                    "focus": "String - major theme/milestone for this week",
+                    "allocated_hours": Float,
+                    "tasks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "allocated_hours": Float
+                        }}
+                    ]
+                }}
+            ],
+            "daily_schedule": [
+                {{
+                    "week_number": Integer,
+                    "day_number": Integer,
+                    "day_name": "String - e.g., Monday, Tuesday",
+                    "total_hours": Float,
+                    "time_blocks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "time_slot": "String - e.g. 09:00 AM - 11:00 AM",
+                            "duration_hours": Float,
+                            "type": "String - Setup/Coding/Learning/etc."
+                        }}
+                    ]
+                }}
+            ],
+            "schedule_analysis": {{
+                "confidence_score": Integer,
+                "goal_completion_forecast": "String",
+                "buffer_time_allocation": "String",
+                "deadline_feasibility_analysis": "String",
+                "rescheduling_suggestions": [
+                    {{
+                        "id": "String - unique short ID, e.g. 'buffer_boost'",
+                        "title": "String",
+                        "description": "String",
+                        "impact": "String"
+                    }}
+                ]
+            }}
+        }}
+        """
+    )
+
+
+
 
 
