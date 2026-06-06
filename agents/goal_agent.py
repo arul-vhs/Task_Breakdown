@@ -346,9 +346,15 @@ def render_goal_intake_module():
         )
         
         # Actions Row
-        col_res1, col_res2, col_res3 = st.columns([1, 1.2, 1])
+        col_res1, col_res2, col_res3 = st.columns([1, 1.5, 1])
         with col_res2:
-            if st.button("🔄 Reset Goal Context", use_container_width=True):
+            if st.button("Proceed to Strategy Generation 🚀", use_container_width=True, type="primary"):
+                st.session_state.app_phase = "strategy_generation"
+                st.rerun()
+                
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            
+            if st.button("🔄 Reset Goal Context", use_container_width=True, type="secondary"):
                 st.session_state.goal_submitted = False
                 st.session_state.goal_analysis = {}
                 st.session_state.goal_questions = []

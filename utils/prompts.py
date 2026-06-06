@@ -52,3 +52,619 @@ def get_goal_analysis_prompt(goal_text: str, persona: dict) -> str:
         }}
         """
     )
+
+
+def get_strategy_generation_prompt(goal_context: dict, profile_data: dict, persona: dict) -> str:
+    """
+    Constructs a highly structured prompt to generate exactly three execution strategies
+    (Fast MVP, Balanced Growth, Ambitious Scale) and a personalized recommendation.
+    
+    Parameters:
+    - goal_context (dict): Compiled goal context containing 'goal', 'category', 'difficulty', 'estimated_duration', 'required_skills', 'risks', 'qa_context'.
+    - profile_data (dict): User's profile choices.
+    - persona (dict): User's execution archetype details.
+    
+    Returns:
+    - str: The fully formatted prompt.
+    """
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+    est_duration = goal_context.get("estimated_duration", "")
+    required_skills = ", ".join(goal_context.get("required_skills", []))
+    risks = "; ".join(goal_context.get("risks", []))
+    
+    # Format QA Context
+    qa_list = []
+    for idx, qa in enumerate(goal_context.get("qa_context", [])):
+        q = qa.get("question", "")
+        a = qa.get("answer", "")
+        qa_list.append(f"Q{idx+1}: {q}\nA{idx+1}: {a}")
+    qa_formatted = "\n\n".join(qa_list)
+    
+    # Profile
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    motivation_style = profile_data.get("motivation_style", "Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+    
+    # Persona
+    persona_name = persona.get("name", "Consistent Explorer")
+    persona_strength = persona.get("strength", "")
+    persona_challenge = persona.get("challenge", "")
+    persona_strategy = persona.get("strategy", "")
+    
+    return textwrap.dedent(
+        f"""
+        You are a world-class startup mentor and execution coach. Your goal is to generate exactly three personalized execution strategies for a user's goal based on their profile, persona, and answers to context questions.
+        
+        === USER GOAL DETAILS ===
+        - Goal: "{goal}"
+        - Category: {category}
+        - Difficulty: {difficulty}
+        - Base Estimated Duration: {est_duration}
+        - Required Skills: {required_skills}
+        - Goal Risks: {risks}
+        
+        === USER PROFILE & PERSONA ===
+        - User Type: {user_type}
+        - Experience Level: {experience_level}
+        - Available Time: {hours_per_week} hours/week
+        - Preference Work Style: {work_style}
+        - Motivation Style: {motivation_style}
+        - Biggest Execution Challenge: {biggest_challenge}
+        - Persona Archetype: {persona_name}
+        - Persona Core Strength: {persona_strength}
+        - Persona Execution Challenge: {persona_challenge}
+        - Persona Recommended Style: {persona_strategy}
+        
+        === CONTEXT QUESTIONS & ANSWERS ===
+        {qa_formatted}
+        
+        === TASK ===
+        Generate exactly three tailored execution strategies with the keys "fast_mvp", "balanced_growth", and "ambitious_scale".
+        
+        For each strategy, provide:
+        - name: The name of the strategy (e.g. "Fast MVP", "Balanced Growth", "Ambitious Scale" or a highly creative variant personalized for their goal).
+        - description: A concise description of how they would execute this goal under this path.
+        - pros: At least 2 bullet points highlighting the advantages (e.g. alignment with their strengths, quick validation, low cost).
+        - cons: At least 2 bullet points highlighting the trade-offs (e.g. limited scope, higher workload, longer time, risk of perfectionism).
+        - estimated_duration: A realistic timeline (e.g. "4 weeks", "3 months", "6 months") tailored to this strategy.
+        - effort_level: The intensity of execution ("Low", "Medium", "High").
+        
+        Recommend exactly one of the three strategies (by setting recommended_strategy_key to either "fast_mvp", "balanced_growth", or "ambitious_scale").
+        
+        Provide a detailed recommended_explanation explaining why that specific strategy was chosen. You MUST explicitly evaluate and base this recommendation on the following 5 criteria:
+        1. Experience: How the strategy fits their {experience_level} level.
+        2. Hours per week: How the strategy maps to their availability of {hours_per_week} hours/week.
+        3. Budget: Inferred budget constraints (or direct answers from Q&A if present). If no budget was explicitly mentioned, make a logical assumption based on their profile and state it.
+        4. Team size: Inferred team size (assume solo unless they specified teammates).
+        5. Goal complexity: How it structures progress relative to the goal's overall complexity.
+        
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+        
+        JSON Schema structure required:
+        {{
+            "strategies": [
+                {{
+                    "key": "fast_mvp",
+                    "name": "String",
+                    "description": "String",
+                    "pros": ["String", "String"],
+                    "cons": ["String", "String"],
+                    "estimated_duration": "String",
+                    "effort_level": "String"
+                }},
+                {{
+                    "key": "balanced_growth",
+                    "name": "String",
+                    "description": "String",
+                    "pros": ["String", "String"],
+                    "cons": ["String", "String"],
+                    "estimated_duration": "String",
+                    "effort_level": "String"
+                }},
+                {{
+                    "key": "ambitious_scale",
+                    "name": "String",
+                    "description": "String",
+                    "pros": ["String", "String"],
+                    "cons": ["String", "String"],
+                    "estimated_duration": "String",
+                    "effort_level": "String"
+                }}
+            ],
+            "recommended_strategy_key": "String - must be one of: fast_mvp, balanced_growth, ambitious_scale",
+            "recommendation_explanation": "String - detailed explanation addressing all 5 criteria: Experience, Hours per week, Budget, Team size, and Goal complexity."
+        }}
+        """
+    )
+
+
+def get_strategy_validation_questions_prompt(profile_data: dict, goal_context: dict, strategy: dict) -> str:
+    """
+    Constructs a prompt to perform gap analysis and generate exactly 3 validation questions.
+    """
+    # Get user profile details
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Get goal details
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+    required_skills = ", ".join(goal_context.get("required_skills", []))
+    risks = "; ".join(goal_context.get("risks", []))
+
+    # Get strategy details
+    strategy_name = strategy.get("name", "Balanced Growth")
+    strategy_desc = strategy.get("description", "")
+    strategy_duration = strategy.get("estimated_duration", "")
+    strategy_effort = strategy.get("effort_level", "")
+
+    return textwrap.dedent(
+        f"""
+        You are a meticulous project planner and execution auditor. Your task is to perform an initial gap analysis of a user's selected execution strategy for their goal, and generate exactly 3 dynamic follow-up validation questions to test their preparation and readiness.
+
+        === USER GOAL DETAILS ===
+        - Goal: "{goal}"
+        - Category: {category}
+        - Difficulty: {difficulty}
+        - Required Skills: {required_skills}
+        - Key Risks: {risks}
+
+        === USER PROFILE ===
+        - User Type: {user_type}
+        - Experience Level: {experience_level}
+        - Available Time: {hours_per_week} hours/week
+        - Work Style Preference: {work_style}
+        - Main Obstacle: {biggest_challenge}
+
+        === SELECTED STRATEGY ===
+        - Strategy Option: {strategy_name}
+        - Description: {strategy_desc}
+        - Estimated Duration: {strategy_duration}
+        - Effort Level: {strategy_effort}
+
+        === ANALYSIS CRITERIA ===
+        Analyze potential gaps in the following areas:
+        1. Missing Skills: What skills might they be missing to execute this specific strategy?
+        2. Missing Resources: What materials, software, hardware, or access do they need?
+        3. Missing Knowledge: What domain expertise or validation steps are missing?
+        4. Time Constraints: Is their availability ({hours_per_week} hrs/week) sufficient for the strategy's timeline ({strategy_duration}) and effort ({strategy_effort})?
+        5. Risks: What execution obstacles could lead to their main failure mode ({biggest_challenge})?
+
+        Generate exactly 3 follow-up validation questions. Ensure the questions adapt to the Goal Type, Strategy, and User Profile. Avoid generic questions; make them deep, conversational, and highly specific to the gaps you identify (e.g. asking about tools, specific learning resources, scheduling conflicts, or contingency plans).
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        JSON Schema structure required:
+        {{
+            "analysis": {{
+                "missing_skills": ["List of potential skill gaps"],
+                "missing_resources": ["List of potential resource/tool gaps"],
+                "missing_knowledge": ["List of potential domain knowledge/validation gaps"],
+                "time_constraints": ["Evaluation of timeline and schedule challenges"],
+                "risks": ["Custom strategy execution risks"]
+            }},
+            "validation_questions": [
+                "Question 1 (focused on skills/knowledge/validation gaps)",
+                "Question 2 (focused on resource requirements/tool access)",
+                "Question 3 (focused on time management/contingency plan for their biggest obstacle: {biggest_challenge})"
+            ]
+        }}
+        """
+    )
+
+
+def get_strategy_readiness_evaluation_prompt(profile_data: dict, goal_context: dict, strategy: dict, qa_list: list) -> str:
+    """
+    Constructs a prompt to grade responses to validation questions and return quantitative scores and qualitative summaries.
+    """
+    # Get user profile details
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Get goal details
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    # Get strategy details
+    strategy_name = strategy.get("name", "Balanced Growth")
+    strategy_desc = strategy.get("description", "")
+    strategy_duration = strategy.get("estimated_duration", "")
+    strategy_effort = strategy.get("effort_level", "")
+
+    # Format Validation Q&As
+    qa_formatted_list = []
+    for idx, qa in enumerate(qa_list):
+        q = qa.get("question", "")
+        a = qa.get("answer", "")
+        qa_formatted_list.append(f"Validation Question {idx+1}: {q}\nUser Answer {idx+1}: {a}")
+    qa_formatted = "\n\n".join(qa_formatted_list)
+
+    return textwrap.dedent(
+        f"""
+        You are a veteran execution coach and strategy validator. The user has provided answers to 3 follow-up validation questions regarding their chosen strategy. You must evaluate their answers, calculate quantitative readiness scores, and generate detailed qualitative insights.
+
+        === USER PROFILE & GOAL ===
+        - Goal: "{goal}" ({category} • {difficulty} level)
+        - Profile: {user_type} • {experience_level} Experience • {hours_per_week} hours/week • Biggest Challenge: {biggest_challenge}
+        - Chosen Strategy: {strategy_name} ({strategy_desc} • Timeline: {strategy_duration} • Effort: {strategy_effort})
+
+        === VALIDATION Q&A RESPONSES ===
+        {qa_formatted}
+
+        === EVALUATION CRITERIA ===
+        Evaluate their answers to assess:
+        1. Skill Readiness: How prepared are they skill-wise? Do they know how to address skill gaps? (Score: 0 to 100)
+        2. Resource Readiness: Do they have or know how to get all tools, templates, systems, or environments needed? (Score: 0 to 100)
+        3. Time Readiness: Is their schedule realistic? Do they have a solid plan to allocate {hours_per_week} hours/week around obstacles? (Score: 0 to 100)
+        4. Overall Readiness: The weighted average score reflecting their overall execution safety and preparation. (Score: 0 to 100)
+
+        Generate clear bullet-pointed lists for:
+        - strengths: Areas where the user is highly prepared or has solid plans.
+        - weaknesses: Remaining preparation vulnerabilities, resource shortages, or skill deficits.
+        - potential_risks: Threat vectors that could detail their execution (especially relating to consistency/overwhelm/loss of motivation).
+        - recommendations: Actionable, immediate steps they should take to improve their readiness before launching.
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        JSON Schema structure required:
+        {{
+            "skill_readiness_score": Integer (0 to 100),
+            "resource_readiness_score": Integer (0 to 100),
+            "time_readiness_score": Integer (0 to 100),
+            "overall_readiness_score": Integer (0 to 100),
+            "strengths": ["Strength bullet point 1", "Strength bullet point 2"],
+            "weaknesses": ["Weakness bullet point 1", "Weakness bullet point 2"],
+            "potential_risks": ["Risk bullet point 1", "Risk bullet point 2"],
+            "recommendations": ["Recommendation bullet point 1", "Recommendation bullet point 2"]
+        }}
+        """
+    )
+
+
+def get_execution_blueprint_prompt(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, refinement_choice: str) -> str:
+    """
+    Constructs a highly structured prompt to generate a personalized 3-7 phase execution roadmap
+    incorporating a specific refinement adjustment choice.
+    """
+    # Get profile details
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Get goal details
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+    required_skills = ", ".join(goal_context.get("required_skills", []))
+
+    # Get strategy details
+    strategy_name = strategy.get("name", "Balanced Growth")
+    strategy_desc = strategy.get("description", "")
+    strategy_duration = strategy.get("estimated_duration", "")
+
+    # Format Validation Scores and Findings
+    scores = validation_results.get("scores", {})
+    feedback = validation_results.get("feedback", {})
+    v_strengths = "; ".join(feedback.get("strengths", []))
+    v_weaknesses = "; ".join(feedback.get("weaknesses", []))
+    v_risks = "; ".join(feedback.get("potential_risks", []))
+    v_recs = "; ".join(feedback.get("recommendations", []))
+
+    return textwrap.dedent(
+        f"""
+        You are a veteran Chief Product Officer and execution coach. Your goal is to generate a comprehensive, highly personalized step-by-step execution roadmap (consisting of exactly 3 to 7 phases) for the user's goal based on their profile, chosen strategy, validation audit, and a selected refinement style.
+
+        === USER PROFILE & ARCHETYPE ===
+        - Goal: "{goal}" ({category} • {difficulty} level)
+        - Archetype: {user_type} ({experience_level} level)
+        - Available time: {hours_per_week} hours/week
+        - Work Preference: {work_style}
+        - Main obstacle challenge: {biggest_challenge}
+
+        === SELECTED STRATEGY ===
+        - Strategy Option: {strategy_name}
+        - Description: {strategy_desc}
+        - Total Estimated Duration: {strategy_duration}
+
+        === STRATEGY VALIDATION RESULTS ===
+        - Readiness Scores:
+          * Skill Readiness: {scores.get("skill_readiness")}%
+          * Resource Readiness: {scores.get("resource_readiness")}%
+          * Time Readiness: {scores.get("time_readiness")}%
+          * Overall Readiness: {scores.get("overall_readiness")}%
+        - Audit Findings:
+          * Key Strengths: {v_strengths}
+          * Highlighted Weaknesses: {v_weaknesses}
+          * Critical Risks: {v_risks}
+          * Coach Recommendations: {v_recs}
+
+        === ROADMAP REFINEMENT STYLE ===
+        Apply this custom constraint: **{refinement_choice}**
+
+        How to structure the phases based on this constraint:
+        - "Default": Provide a balanced, standard execution timeline aligning with the selected strategy.
+        - "Faster Completion": Focus on launch speed. Compress timelines by 20-30%, recommend parallel tasks, and defer non-essential features/learning.
+        - "Lower Workload": Adjust for lower stress. Divide phases into smaller milestone increments, stretch timelines, and suggest micro-tasks fitting into small sessions.
+        - "Lower Risk": Prioritize execution safety. Build in explicit validation checkpoints, testing buffers, and fallback plans to mitigate the challenge: {biggest_challenge}.
+        - "Higher Learning": Prioritize skill acquisition. Dedicate Phase 1/2 to spikes, research, tutorials, and prototype testing to build the required skills: {required_skills}.
+        - "Maximum Growth": Scale up the objectives. Expand the blueprint to include launch prep, user feedback loops, metrics tracking, or production-grade architecture setups.
+
+        === OUTPUT FORMAT ===
+        Generate exactly 3 to 7 phases.
+        For each phase, provide:
+        - phase_number: Integer (1 to total phases)
+        - name: Concise, premium name (e.g. "Phase 1: Foundation & Spikes", "Phase 2: Core Architecture Build", etc.)
+        - objective: Clear focus and list of top deliverables for this phase
+        - milestone: The concrete result/outcome that marks the end of this phase
+        - success_criteria: A checklist or verifiable metric indicating the phase is successfully completed
+        - duration: Estimated duration (e.g. "Weeks 1-2" or "Days 1-7")
+        - dependencies: List of string names or numbers of preceding phases (e.g. [] for Phase 1, or ["Phase 1"] for Phase 2)
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        JSON Schema structure required:
+        {{
+            "blueprint_name": "String - e.g. 'Consistent Launch Roadmap'",
+            "summary": "String - brief high-level overview of the roadmap adjusted for the refinement style",
+            "phases": [
+                {{
+                    "phase_number": Integer,
+                    "name": "String",
+                    "objective": "String",
+                    "milestone": "String",
+                    "success_criteria": "String",
+                    "duration": "String",
+                    "dependencies": ["String"]
+                }}
+            ]
+        }}
+        """
+    )
+
+
+def get_task_breakdown_prompt(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, blueprint: dict, depth: str) -> str:
+    """
+    Constructs a highly structured prompt to generate a detailed list of tasks and subtasks
+    for each phase of the execution blueprint, customized to the user's archetype and requested depth.
+    """
+    # Profile
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Goal
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+    required_skills = ", ".join(goal_context.get("required_skills", []))
+
+    # Strategy & Validation
+    strategy_name = strategy.get("name", "Balanced Growth")
+    scores = validation_results.get("scores", {})
+    overall_readiness = scores.get("overall_readiness", 50)
+
+    # Format Blueprint Phases
+    phases_formatted_list = []
+    for phase in blueprint.get("phases", []):
+        num = phase.get("phase_number", 1)
+        name = phase.get("name", "")
+        objective = phase.get("objective", "")
+        milestone = phase.get("milestone", "")
+        duration = phase.get("duration", "")
+        phases_formatted_list.append(
+            f"Phase {num}: {name}\n- Duration: {duration}\n- Objective: {objective}\n- Target Milestone: {milestone}"
+        )
+    phases_formatted = "\n\n".join(phases_formatted_list)
+
+    return textwrap.dedent(
+        f"""
+        You are an elite agile project manager and execution scrum master. Your task is to breakdown the execution blueprint phases into a highly actionable backlog of tasks and subtasks.
+
+        === USER PROFILE & COACHING CONTEXT ===
+        - Goal: "{goal}" ({category} • {difficulty} difficulty)
+        - User Archetype: {user_type} ({experience_level} level)
+        - Available hours: {hours_per_week} hours/week
+        - Preference style: {work_style}
+        - Main challenge obstacle: {biggest_challenge}
+        - Strategy Choice: {strategy_name}
+        - Audit Overall Readiness Score: {overall_readiness}%
+
+        === EXECUTION BLUEPRINT PHASES ===
+        {phases_formatted}
+
+        === TASK BREAKDOWN GRANULARITY SPECIFICATION ===
+        You must structure tasks matching this depth request: **{depth}**
+
+        Rules for depth levels:
+        - "Basic": Generate exactly 2-3 high-level tasks per phase. Subtasks should contain 1-2 items outlining general directions.
+        - "Detailed": Generate exactly 3-5 tasks per phase. Subtasks should contain 3-4 items outlining concrete deliverables, setups, or actions.
+        - "Very Detailed": Generate exactly 5-8 highly granular tasks per phase. Subtasks should contain 4-6 items detailing exact coding steps, CLI commands, specific files to modify, learning tutorials to watch, or tests to run.
+
+        === USER PERSONALIZATION CONSTRAINTS ===
+        - Experience Level ({experience_level}):
+          * Beginner: Provide more "Learning" and "Setup" tasks, with detailed descriptions of tools and simple step-by-step guidance.
+          * Advanced: Focus on performance, security, architecture design, and automation tasks. Keep descriptions succinct but structurally advanced.
+        - Weekly Availability ({hours_per_week} hrs/week):
+          * Ensure estimated hours per task do not exceed user availability for the phase duration. Break large tasks into small chunks (e.g. 1-4 hours each).
+        - Work Style ({work_style}):
+          * Quick Wins: Structure tasks with lower estimated hours (1-2 hours) to allow rapid completions.
+          * Deep Focus: Structure tasks into larger, cohesive deep work sessions (3-6 hours).
+
+        === OUTPUT JSON SCHEMA ===
+        For each blueprint phase, generate a list of tasks.
+        Each task must contain:
+        - task_id: Unique string identifier format "T[PhaseNumber]_[TaskNumber]" (e.g., "T1_1", "T1_2", "T2_1").
+        - name: Concise, actionable task name.
+        - description: Clear explanation of what needs to be done.
+        - subtasks: List of string checklist items (complying with the depth level rules).
+        - priority: "High", "Medium", or "Low".
+        - difficulty: "Beginner", "Intermediate", or "Advanced".
+        - estimated_hours: Integer hours required (e.g., 2, 4).
+        - dependencies: List of string task_ids that must be completed first (e.g., ["T1_1"]).
+        - task_type: "Setup", "Learning", "Research", "Coding", "Testing", or "Validation".
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        Required JSON structure:
+        {{
+            "blueprint_id": "String",
+            "depth": "String - Basic/Detailed/Very Detailed",
+            "tasks_by_phase": [
+                {{
+                    "phase_number": Integer,
+                    "phase_name": "String",
+                    "tasks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "description": "String",
+                            "subtasks": ["String"],
+                            "priority": "String",
+                            "difficulty": "String",
+                            "estimated_hours": Integer,
+                            "dependencies": ["String"],
+                            "task_type": "String",
+                            "subtasks": ["String"]
+                        }}
+                    ]
+                }}
+            ]
+        }}
+        """
+    )
+
+
+def get_roadmap_dag_prompt(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, refinement_choice: str, depth: str) -> str:
+    """
+    Constructs a prompt to generate a single cohesive JSON payload containing phases, tasks, subtasks,
+    dependencies, and estimations, optimized by refinement style and checkpoint depth.
+    """
+    # Profile
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Goal
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+    required_skills = ", ".join(goal_context.get("required_skills", []))
+
+    # Strategy & Validation
+    strategy_name = strategy.get("name", "Balanced Growth")
+    strategy_desc = strategy.get("description", "")
+    strategy_duration = strategy.get("estimated_duration", "")
+    scores = validation_results.get("scores", {})
+    v_feedback = validation_results.get("feedback", {})
+    v_strengths = "; ".join(v_feedback.get("strengths", []))
+    v_weaknesses = "; ".join(v_feedback.get("weaknesses", []))
+    v_risks = "; ".join(v_feedback.get("potential_risks", []))
+    v_recs = "; ".join(v_feedback.get("recommendations", []))
+
+    return textwrap.dedent(
+        f"""
+        You are a master product manager, software architect, and execution coach. Your goal is to generate a single unified Execution Roadmap and Task dependency schema (consisting of exactly 3 to 7 phases) for the user's goal based on their profile, chosen strategy, validation audit, and optimization preferences.
+
+        === USER PROFILE & COACHING CONTEXT ===
+        - Goal: "{goal}" ({category} • {difficulty} difficulty)
+        - User Archetype: {user_type} ({experience_level} level)
+        - Available hours: {hours_per_week} hours/week
+        - Work Preference style: {work_style}
+        - Main obstacle challenge: {biggest_challenge}
+        - Strategy Choice: {strategy_name} ({strategy_desc} • Timeline: {strategy_duration})
+
+        === AUDIT VALIDATION RESULTS ===
+        - Readiness: Skill {scores.get("skill_readiness")}% • Resource {scores.get("resource_readiness")}% • Time {scores.get("time_readiness")}% • Overall {scores.get("overall_readiness")}%
+        - Strengths: {v_strengths}
+        - Weaknesses: {v_weaknesses}
+        - Critical Risks: {v_risks}
+        - Coach Recommendations: {v_recs}
+
+        === ROADMAP REFINEMENT STYLE (CONSTRAINTS) ===
+        Apply this custom constraint: **{refinement_choice}**
+        - "Default": Balanced standard roadmap.
+        - "Faster Completion": Compress timelines by 20-30%, recommend parallel tasks, defer non-essential items.
+        - "Lower Workload": Stretch timelines, break into smaller milestones, schedule micro-tasks fitting smaller sessions.
+        - "Lower Risk": Add explicit testing buffers, fallback plans, and strict validation checkpoints.
+        - "Higher Learning": Dedicate early phases to spikes, tutorials, documentation, and prototyping.
+        - "Maximum Growth": Scale up objectives to include launch prep, marketing setups, metrics tracking, or production architecture.
+
+        === TASK BREAKDOWN GRANULARITY ===
+        Structure task listings matching this depth: **{depth}**
+        - "Basic": 2-3 high-level tasks per phase. Subtasks contain 1-2 general directions.
+        - "Detailed": 3-5 tasks per phase. Subtasks contain 3-4 concrete steps.
+        - "Very Detailed": 5-8 highly granular tasks per phase. Subtasks contain 4-6 specific steps detailing commands, files, or specific tutorial goals.
+        Personalize task difficulty for the user's {experience_level} level and {hours_per_week} hours/week availability.
+
+        === TASK DEPENDENCIES & DAG (DIRECTED ACYCLIC GRAPH) ===
+        Assign dependencies carefully:
+        - Each task must have a unique ID: "T[PhaseNumber]_[TaskNumber]" (e.g., "T1_1", "T1_2", "T2_1").
+        - List dependencies as task IDs that must be completed *before* starting this task.
+        - Ensure there are NO circular dependencies.
+
+        === OUTPUT FORMAT ===
+        Return exactly 3 to 7 phases.
+        For each phase, provide:
+        - phase_number: Integer (1 to total phases)
+        - name: Phase name (e.g. "Phase 1: Setup & Spike")
+        - duration: Estimated duration (e.g. "Weeks 1-2")
+        - objective: High-level focus of the phase
+        - milestone: The concrete result/outcome marking the end of the phase
+        - success_criteria: Verification check indicating phase completion
+        - tasks: List of tasks in this phase.
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        Required JSON structure:
+        {{
+            "roadmap_name": "String",
+            "summary": "String",
+            "phases": [
+                {{
+                    "phase_number": Integer,
+                    "name": "String",
+                    "duration": "String",
+                    "objective": "String",
+                    "milestone": "String",
+                    "success_criteria": "String",
+                    "tasks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "description": "String",
+                            "priority": "String - High/Medium/Low",
+                            "difficulty": "String - Beginner/Intermediate/Advanced",
+                            "estimated_hours": Integer,
+                            "dependencies": ["String"],
+                            "task_type": "String",
+                            "subtasks": ["String"]
+                        }}
+                    ]
+                }}
+            ]
+        }}
+        """
+    )
+
+
+
+
