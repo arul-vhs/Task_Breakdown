@@ -1,7 +1,9 @@
 import streamlit as st
 import datetime
+import streamlit.components.v1 as components
 from services.gemini_service import generate_roadmap_dag_with_gemini
 from agents.goal_agent import render_sidebar_api_key
+from utils.state_persistence import clear_state_cache
 
 def initialize_roadmap_dag_state():
     """
@@ -295,25 +297,36 @@ def render_execution_blueprint_agent():
             mermaid_lines.append("classDef complete fill:#064e3b,stroke:#10b981,stroke-width:2.5px,color:#ecfdf5;")
             mermaid_lines.append("classDef ip fill:#4c1d95,stroke:#a855f7,stroke-width:2.5px,color:#f5f3ff;")
 
+            # Build set of valid task IDs first
+            valid_task_ids = set()
+            for phase in phases:
+                for task in phase.get("tasks", []):
+                    t_id = task.get("task_id")
+                    if t_id:
+                        valid_task_ids.add(t_id.replace(" ", "").strip())
+
             # Nodes mapping inside subgraphs
             for phase in phases:
                 p_num = phase.get("phase_number")
                 p_title = phase.get("name", f"Phase {p_num}")
                 # Clean title for subgraph name
-                clean_p_title = p_title.replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace(":", "-")
+                clean_p_title = p_title.replace('"', '').replace("'", "").replace("&", "and").replace("[", "").replace("]", "").replace("(", "").replace(")", "").replace(":", "-")
                 
                 mermaid_lines.append(f"subgraph Phase_{p_num} [\"{clean_p_title}\"]")
                 
                 for task in phase.get("tasks", []):
-                    t_id = task.get("task_id")
+                    raw_t_id = task.get("task_id", "")
+                    t_id = raw_t_id.replace(" ", "").strip() if raw_t_id else ""
+                    if not t_id:
+                        continue
                     t_name = task.get("name", "")
-                    clean_t_name = t_name.replace('"', "'").replace("[", "(").replace("]", ")")
+                    clean_t_name = t_name.replace('"', "'").replace("&", "and").replace("[", "(").replace("]", ")")
                     
                     if len(clean_t_name) > 28:
                         clean_t_name = clean_t_name[:25] + "..."
 
                     # Determine status style
-                    sub_keys = [f"{t_id}_{i}" for i in range(len(task.get("subtasks", [])))]
+                    sub_keys = [f"{raw_t_id}_{i}" for i in range(len(task.get("subtasks", [])))]
                     task_completed = all(st.session_state.task_completions.get(k, False) for k in sub_keys) if sub_keys else False
                     task_started = any(st.session_state.task_completions.get(k, False) for k in sub_keys) if sub_keys else False
                     
@@ -330,12 +343,22 @@ def render_execution_blueprint_agent():
             # Edges mapping
             for phase in phases:
                 for task in phase.get("tasks", []):
-                    t_id = task.get("task_id")
+                    raw_t_id = task.get("task_id", "")
+                    t_id = raw_t_id.replace(" ", "").strip() if raw_t_id else ""
+                    if not t_id:
+                        continue
                     for dep in task.get("dependencies", []):
-                        if dep and dep.strip():
-                            mermaid_lines.append(f"  {dep} --> {t_id}")
+                        if isinstance(dep, str):
+                            parts = dep.replace(";", ",").split(",")
+                            for part in parts:
+                                clean_dep = part.replace(" ", "").strip()
+                                if clean_dep in valid_task_ids and clean_dep != t_id:
+                                    mermaid_lines.append(f"  {clean_dep} --> {t_id}")
 
             mermaid_string = "\n".join(mermaid_lines)
+            print("--- DEBUG MERMAID ---")
+            print(mermaid_string)
+            print("--- END DEBUG ---")
             
             # Display Diagram inside a styled container
             with st.container(border=True):
@@ -349,7 +372,53 @@ def render_execution_blueprint_agent():
                     </div>
                     """
                 )
-                st.markdown(f"```mermaid\n{mermaid_string}\n```")
+                # HTML template to load Mermaid from CDN and render it inside the iframe
+                mermaid_html = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        body {{
+                            background-color: transparent !important;
+                            margin: 0;
+                            padding: 0;
+                            display: flex;
+                            justify-content: center;
+                            font-family: 'Outfit', 'Inter', sans-serif;
+                            color: #cbd5e1;
+                            overflow-x: auto;
+                        }}
+                        #mermaid-container {{
+                            width: 100%;
+                            display: flex;
+                            justify-content: center;
+                        }}
+                    </style>
+                    <script src="https://cdn.jsdelivr.net/npm/mermaid@9.4.3/dist/mermaid.min.js"></script>
+                    <script>
+                        mermaid.initialize({{
+                            startOnLoad: true,
+                            theme: 'dark',
+                            securityLevel: 'loose',
+                            themeVariables: {{
+                                background: '#0b0f19',
+                                primaryColor: '#111827',
+                                primaryTextColor: '#9ca3af',
+                                lineColor: '#374151'
+                            }}
+                        }});
+                    </script>
+                </head>
+                <body>
+                    <div id="mermaid-container">
+                        <div class="mermaid">
+{mermaid_string}
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                components.html(mermaid_html, height=520, scrolling=True)
 
         # Right Column: Roadmap Timeline & Checklists
         with col_list:
@@ -448,7 +517,12 @@ def render_execution_blueprint_agent():
                 
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             
-            if st.button("🔄 Reset Roadmap Data", key="reset_roadmap_dag", use_container_width=True, type="secondary"):
-                st.session_state.roadmap_dag_data = None
-                st.session_state.task_completions = {}
-                st.rerun()
+            col_reset1, col_reset2 = st.columns([1, 1])
+            with col_reset1:
+                if st.button("🔄 Reset Checklist Progress", key="reset_checklist_only", use_container_width=True, type="secondary"):
+                    st.session_state.task_completions = {k: False for k in st.session_state.task_completions}
+                    st.rerun()
+            with col_reset2:
+                if st.button("🚨 Clear All Data & Reset", key="hard_reset_all", use_container_width=True, type="secondary"):
+                    clear_state_cache()
+                    st.rerun()
