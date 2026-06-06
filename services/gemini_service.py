@@ -10,7 +10,8 @@ from utils.prompts import (
     get_strategy_readiness_evaluation_prompt,
     get_execution_blueprint_prompt,
     get_task_breakdown_prompt,
-    get_roadmap_dag_prompt
+    get_roadmap_dag_prompt,
+    get_scheduling_prompt
 )
 
 # Load environment variables on startup
@@ -329,6 +330,32 @@ def generate_roadmap_dag_with_gemini(profile_data: dict, goal_context: dict, str
             raise Exception(f"Roadmap & DAG Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
 
 
-
-
-
+def generate_schedule_with_gemini(profile_data: dict, goal_context: dict, selected_strategy: dict, roadmap_dag_data: dict, api_key: str) -> dict:
+    """
+    Calls Gemini to generate a weekly and daily schedule.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_scheduling_prompt(profile_data, goal_context, selected_strategy, roadmap_dag_data)
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        try:
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            result = extract_json_from_text(response.text)
+            return result
+        except Exception as fallback_e:
+            raise Exception(f"Scheduling Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")

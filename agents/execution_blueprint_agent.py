@@ -510,9 +510,8 @@ def render_execution_blueprint_agent():
         # 5. CONTROL PANEL
         col_act1, col_act2, col_act3 = st.columns([1, 1.8, 1])
         with col_act2:
-            if st.button("Complete Onboarding & Enter Dashboard 🎉", key="complete_dag_journey", use_container_width=True, type="primary"):
-                st.balloons()
-                st.session_state.app_phase = "progress_tracking"
+            if st.button("Proceed to Scheduling Workspace 📅", key="complete_dag_journey", use_container_width=True, type="primary"):
+                st.session_state.app_phase = "scheduling"
                 st.rerun()
                 
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
