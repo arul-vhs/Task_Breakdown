@@ -3,6 +3,9 @@ import textwrap
 from components.onboarding import render_onboarding_wizard, render_sidebar_progress
 from components.persona import render_results_page
 from agents.goal_agent import render_goal_intake_module
+from agents.strategy_agent import render_strategy_agent
+from agents.strategy_validation_agent import render_strategy_validation_agent
+from agents.execution_blueprint_agent import render_execution_blueprint_agent
 
 # Set page configuration
 st.set_page_config(
@@ -19,7 +22,7 @@ st.html(
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
     
     /* Enforce modern geometric font family */
-    html, body, [class*="css"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, div, span, button, input {
+    html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, input {
         font-family: 'Outfit', 'Inter', sans-serif !important;
     }
     
@@ -119,6 +122,7 @@ st.html(
         font-size: 1rem !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         height: 48px !important;
+        font-family: 'Outfit', 'Inter', sans-serif !important;
     }
     
     div.stButton > button[kind="primary"] {
@@ -399,3 +403,31 @@ elif st.session_state.app_phase == "goal_intake":
     st.sidebar.html("<hr style='border-color: rgba(255,255,255,0.1); margin: 15px 0;'>")
     
     render_goal_intake_module()
+
+elif st.session_state.app_phase == "strategy_generation":
+    render_strategy_agent()
+
+elif st.session_state.app_phase == "strategy_validation":
+    render_strategy_validation_agent()
+
+elif st.session_state.app_phase == "execution_blueprint":
+    render_execution_blueprint_agent()
+
+elif st.session_state.app_phase == "progress_tracking":
+    st.html(
+        """
+        <div style='text-align: center; max-width: 800px; margin: 0 auto; padding: 60px 20px;'>
+            <span class='badge' style='background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px;'>JOURNEY COMPLETED 🎉</span>
+            <h1 style='font-size: 3.2rem; font-weight: 800; margin-top: 15px; margin-bottom: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>Ready to Execute</h1>
+            <p style='color: #94a3b8; font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px;'>
+                Your execution archetype, goal analysis, strategy audit, sequential blueprint milestones, and actionable checklists have been saved in session state. 
+                Your coaching journey is set up, and you are ready for execution!
+            </p>
+        </div>
+        """
+    )
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
+        if st.button("🔄 Back to Roadmap & Checklist Workspace", use_container_width=True, type="secondary"):
+            st.session_state.app_phase = "execution_blueprint"
+            st.rerun()
