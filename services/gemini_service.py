@@ -11,7 +11,8 @@ from utils.prompts import (
     get_execution_blueprint_prompt,
     get_task_breakdown_prompt,
     get_roadmap_dag_prompt,
-    get_scheduling_prompt
+    get_scheduling_prompt,
+    get_weekly_reflection_prompt
 )
 
 # Load environment variables on startup
@@ -359,3 +360,34 @@ def generate_schedule_with_gemini(profile_data: dict, goal_context: dict, select
             return result
         except Exception as fallback_e:
             raise Exception(f"Scheduling Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+
+
+def generate_weekly_reflection_with_gemini(profile_data: dict, goal_context: dict, progress_summary: dict, api_key: str) -> dict:
+    """
+    Calls Gemini to generate a weekly coaching reflection based on execution progress.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_weekly_reflection_prompt(profile_data, goal_context, progress_summary)
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        try:
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            result = extract_json_from_text(response.text)
+            return result
+        except Exception as fallback_e:
+            raise Exception(f"Weekly Reflection Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")

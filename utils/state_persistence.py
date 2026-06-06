@@ -23,7 +23,12 @@ PERSISTENT_KEYS = [
     "roadmap_dag_data",
     "blueprint_refinement",
     "task_depth",
-    "task_completions"
+    "task_completions",
+    "task_due_dates",
+    "task_time_spent",
+    "streak_count",
+    "last_activity_date",
+    "weekly_reflections"
 ]
 
 def load_state_from_cache():

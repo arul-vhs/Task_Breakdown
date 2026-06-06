@@ -1,5 +1,5 @@
 {
-    "app_phase": "scheduling",
+    "app_phase": "progress_tracking",
     "onboarding_started": true,
     "current_step": 6,
     "profile_data": {
@@ -92,18 +92,18 @@
     "custom_api_key": "AQ.Ab8RN6Kf5hjhCtbXK2v3i8JAwCq4lmIEfFs82I8tnSHL3RGYwg",
     "selected_strategy_data": {
         "key": "fast_mvp",
-        "name": "The Digital Soul Prototype",
-        "description": "Instead of physical hardware, focus exclusively on a digital 'human' simulation. Build a narrow AI agent using an LLM integrated with a simple virtual avatar (like Unity or Unreal Engine) that can perform one specific human-like cognitive task, such as emotive conversation or basic decision-making in a virtual environment.",
+        "name": "Digital Persona Prototype",
+        "description": "Focus exclusively on the 'cognitive' aspect of a human by building a high-fidelity AI agent. Utilize LLMs, RAG (Retrieval-Augmented Generation) for long-term memory, and a text-to-speech interface to create a digital entity that mimics human personality and reasoning.",
         "pros": [
-            "Provides immediate 'Quick Wins' which align with the user's motivation style",
-            "Eliminates the high cost and friction of physical mechatronics",
-            "Fits perfectly within a strict 10-hour weekly time limit"
+            "Immediate 'Quick Wins' through API integrations",
+            "Zero hardware cost and low barrier to entry",
+            "Aligns perfectly with 10 hours/week availability"
         ],
         "cons": [
-            "Does not result in a physical entity",
-            "May feel like a pivot away from the 'robotics' aspect of the goal"
+            "Lacks physical embodiment",
+            "Dependent on third-party AI providers"
         ],
-        "estimated_duration": "2 months",
+        "estimated_duration": "1 month",
         "effort_level": "Low"
     },
     "strategy_validation": {
@@ -553,12 +553,12 @@
     "task_depth": "Detailed",
     "task_completions": {
         "T1_1_0": false,
-        "T1_1_1": false,
-        "T1_1_2": false,
+        "T1_1_1": true,
+        "T1_1_2": true,
         "T1_1_3": false,
         "T1_2_0": false,
         "T1_2_1": false,
-        "T1_2_2": false,
+        "T1_2_2": true,
         "T1_2_3": false,
         "T1_3_0": false,
         "T1_3_1": false,
@@ -628,5 +628,30 @@
         "T5_3_1": false,
         "T5_3_2": false,
         "T5_3_3": false
-    }
+    },
+    "task_due_dates": {
+        "T1_1": "2026-06-13",
+        "T1_2": "2026-06-13",
+        "T1_3": "2026-06-13",
+        "T1_4": "2026-06-13",
+        "T2_1": "2026-06-20",
+        "T2_2": "2026-06-20",
+        "T2_3": "2026-06-27",
+        "T2_4": "2026-06-27",
+        "T3_1": "2026-07-04",
+        "T3_2": "2026-07-04",
+        "T3_3": "2026-07-11",
+        "T3_4": "2026-07-11",
+        "T4_1": "2026-07-18",
+        "T4_2": "2026-07-25",
+        "T4_3": "2026-07-25",
+        "T4_4": "2026-07-25",
+        "T5_1": "2026-08-01",
+        "T5_2": "2026-08-01",
+        "T5_3": "2026-08-01"
+    },
+    "task_time_spent": {},
+    "streak_count": 1,
+    "last_activity_date": "2026-06-06",
+    "weekly_reflections": []
 }

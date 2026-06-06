@@ -798,6 +798,70 @@ def get_scheduling_prompt(profile_data: dict, goal_context: dict, selected_strat
     )
 
 
+def get_weekly_reflection_prompt(profile_data: dict, goal_context: dict, progress_summary: dict) -> str:
+    """
+    Constructs a prompt to generate a personalized weekly progress reflection and coaching guidance.
+    """
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    # Progress details
+    health_score = progress_summary.get("health_score", 100)
+    completion_rate = progress_summary.get("completion_rate", 0)
+    streak_count = progress_summary.get("streak_count", 0)
+    overdue_count = progress_summary.get("overdue_count", 0)
+    total_hours_spent = progress_summary.get("total_hours_spent", 0.0)
+    completed_tasks_count = progress_summary.get("completed_tasks_count", 0)
+    total_tasks_count = progress_summary.get("total_tasks_count", 0)
+    overdue_tasks = ", ".join(progress_summary.get("overdue_tasks_names", [])) or "None"
+
+    return textwrap.dedent(
+        f"""
+        You are an elite, highly empathetic AI execution coach. Your goal is to analyze the user's progress for their goal, evaluate their performance metrics, identify bottlenecks (especially relative to their biggest execution challenge), and provide custom coaching feedback.
+
+        === USER PROFILE & COACHING CONTEXT ===
+        - Goal: "{goal}" ({category} • {difficulty} difficulty)
+        - User Archetype: {user_type} ({experience_level} level)
+        - Scheduled availability: {hours_per_week} hours/week
+        - Work style: {work_style}
+        - Main obstacle/challenge: {biggest_challenge}
+
+        === CURRENT PROGRESS METRICS ===
+        - Execution Health Score: {health_score}/100
+        - Overall Goal Completion: {completion_rate}% ({completed_tasks_count}/{total_tasks_count} tasks completed)
+        - Cumulative Hours Spent: {total_hours_spent} hours
+        - Active Streak: {streak_count} days
+        - Overdue Tasks Count: {overdue_count}
+        - Overdue Tasks list: {overdue_tasks}
+
+        === TASK ===
+        Generate a thoughtful execution reflection. Your response must address:
+        1. **Bottleneck Diagnostics**: If they have overdue tasks, identify the likely cause based on their profile challenge ({biggest_challenge}) and suggest how to resolve it. If no tasks are overdue, congratulate them on their consistency.
+        2. **Streak & Momentum**: Review their streak of {streak_count} days and describe how to keep the momentum high.
+        3. **Tactical Strategy Adjustments**: Provide 2-3 specific, actionable tweaks to their weekly routines, buffers, or task handling.
+        4. **Encouragement**: A high-impact coaching statement.
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        Required JSON structure:
+        {{
+            "reflection": "String - detailed coaching feedback formatted in clean markdown paragraphs",
+            "suggested_adjustments": [
+                "Specific, concrete adjustments mapping to their performance and work style"
+            ],
+            "encouragement_quote": "String - a short, high-impact motivational quote to close the session"
+        }}
+        """
+    )
+
+
 
 
 

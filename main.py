@@ -7,6 +7,7 @@ from agents.strategy_agent import render_strategy_agent
 from agents.strategy_validation_agent import render_strategy_validation_agent
 from agents.execution_blueprint_agent import render_execution_blueprint_agent
 from agents.scheduling_agent import render_scheduling_agent
+from agents.progress_agent import render_progress_agent
 from utils.state_persistence import load_state_from_cache, save_state_to_cache
 
 # Set page configuration
@@ -422,23 +423,7 @@ elif st.session_state.app_phase == "scheduling":
     render_scheduling_agent()
 
 elif st.session_state.app_phase == "progress_tracking":
-    st.html(
-        """
-        <div style='text-align: center; max-width: 800px; margin: 0 auto; padding: 60px 20px;'>
-            <span class='badge' style='background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; letter-spacing: 1.5px;'>JOURNEY COMPLETED 🎉</span>
-            <h1 style='font-size: 3.2rem; font-weight: 800; margin-top: 15px; margin-bottom: 15px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>Ready to Execute</h1>
-            <p style='color: #94a3b8; font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px;'>
-                Your execution archetype, goal analysis, strategy audit, sequential blueprint milestones, and actionable checklists have been saved in session state. 
-                Your coaching journey is set up, and you are ready for execution!
-            </p>
-        </div>
-        """
-    )
-    col1, col2, col3 = st.columns([1, 1.2, 1])
-    with col2:
-        if st.button("🔄 Back to Scheduling Workspace", use_container_width=True, type="secondary"):
-            st.session_state.app_phase = "scheduling"
-            st.rerun()
+    render_progress_agent()
 
 # Automatically save state to cache at the end of the script run
 save_state_to_cache()
