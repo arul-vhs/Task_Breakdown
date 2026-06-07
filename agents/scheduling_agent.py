@@ -7,12 +7,28 @@ def initialize_scheduling_state():
     """
     Initializes session state variables for the Scheduling Agent.
     """
-    if "weekly_schedule" not in st.session_state:
-        st.session_state.weekly_schedule = None
-    if "daily_schedule" not in st.session_state:
-        st.session_state.daily_schedule = None
-    if "schedule_analysis" not in st.session_state:
-        st.session_state.schedule_analysis = None
+    if "baseline_schedule" not in st.session_state:
+        st.session_state["baseline_schedule"] = None
+    if "active_schedule" not in st.session_state:
+        st.session_state["active_schedule"] = None
+    if "schedule_versions" not in st.session_state:
+        st.session_state["schedule_versions"] = []
+    if "current_schedule_version" not in st.session_state:
+        st.session_state["current_schedule_version"] = 0
+
+    # Sync legacy keys with active_schedule if it exists
+    if st.session_state["active_schedule"]:
+        st.session_state.weekly_schedule = st.session_state["active_schedule"].get("weekly_schedule")
+        st.session_state.daily_schedule = st.session_state["active_schedule"].get("daily_schedule")
+        st.session_state.schedule_analysis = st.session_state["active_schedule"].get("schedule_analysis")
+    else:
+        if "weekly_schedule" not in st.session_state:
+            st.session_state.weekly_schedule = None
+        if "daily_schedule" not in st.session_state:
+            st.session_state.daily_schedule = None
+        if "schedule_analysis" not in st.session_state:
+            st.session_state.schedule_analysis = None
+
     if "applied_suggestion" not in st.session_state:
         st.session_state.applied_suggestion = None
     if "original_weekly_schedule" not in st.session_state:
@@ -82,6 +98,12 @@ def apply_rescheduling_suggestion(suggestion_id: str):
         analysis_copy["deadline_feasibility_analysis"] = "Optimized: Work distributed onto weekends to lower weekday strain."
         st.session_state.schedule_analysis = analysis_copy
 
+    # Sync to active_schedule
+    if st.session_state["active_schedule"]:
+        st.session_state["active_schedule"]["weekly_schedule"] = st.session_state.weekly_schedule
+        st.session_state["active_schedule"]["daily_schedule"] = st.session_state.daily_schedule
+        st.session_state["active_schedule"]["schedule_analysis"] = st.session_state.schedule_analysis
+
 def reset_schedule():
     """
     Resets the schedule to the original generated version.
@@ -94,6 +116,12 @@ def reset_schedule():
         st.session_state.original_weekly_schedule = None
         st.session_state.original_daily_schedule = None
         st.session_state.original_schedule_analysis = None
+        
+        # Sync to active_schedule
+        if st.session_state["active_schedule"]:
+            st.session_state["active_schedule"]["weekly_schedule"] = st.session_state.weekly_schedule
+            st.session_state["active_schedule"]["daily_schedule"] = st.session_state.daily_schedule
+            st.session_state["active_schedule"]["schedule_analysis"] = st.session_state.schedule_analysis
 
 def render_scheduling_agent():
     """
@@ -322,9 +350,29 @@ def render_scheduling_agent():
                             roadmap,
                             api_key
                         )
-                        st.session_state.weekly_schedule = res.get("weekly_schedule", [])
-                        st.session_state.daily_schedule = res.get("daily_schedule", [])
-                        st.session_state.schedule_analysis = res.get("schedule_analysis", {})
+                        schedule_data = {
+                            "weekly_schedule": res.get("weekly_schedule", []),
+                            "daily_schedule": res.get("daily_schedule", []),
+                            "schedule_analysis": res.get("schedule_analysis", {})
+                        }
+                        st.session_state["baseline_schedule"] = schedule_data
+                        st.session_state["active_schedule"] = schedule_data
+                        st.session_state["schedule_versions"] = [
+                            {
+                                "version": 1,
+                                "name": "Original Schedule",
+                                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                "schedule": schedule_data
+                            }
+                        ]
+                        st.session_state["current_schedule_version"] = 1
+                        st.session_state["roadmap_health"] = 100
+                        st.session_state["completion_forecast"] = schedule_data["schedule_analysis"].get("goal_completion_forecast", "")
+                        st.session_state["impact_analysis"] = "Original schedule generated."
+
+                        st.session_state.weekly_schedule = schedule_data["weekly_schedule"]
+                        st.session_state.daily_schedule = schedule_data["daily_schedule"]
+                        st.session_state.schedule_analysis = schedule_data["schedule_analysis"]
                         st.rerun()
                     except Exception as e:
                         st.error(f"Scheduling generation failed: {str(e)}")
@@ -576,4 +624,14 @@ def render_scheduling_agent():
                 st.session_state.original_weekly_schedule = None
                 st.session_state.original_daily_schedule = None
                 st.session_state.original_schedule_analysis = None
+                
+                # Reset versioning variables
+                st.session_state["baseline_schedule"] = None
+                st.session_state["active_schedule"] = None
+                st.session_state["schedule_versions"] = []
+                st.session_state["current_schedule_version"] = 0
+                st.session_state["replanned_schedule_preview"] = None
+                st.session_state["roadmap_health"] = None
+                st.session_state["completion_forecast"] = None
+                st.session_state["impact_analysis"] = None
                 st.rerun()

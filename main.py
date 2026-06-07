@@ -8,6 +8,8 @@ from agents.strategy_validation_agent import render_strategy_validation_agent
 from agents.execution_blueprint_agent import render_execution_blueprint_agent
 from agents.scheduling_agent import render_scheduling_agent
 from agents.progress_agent import render_progress_agent
+from agents.coach_agent import render_coach_agent
+from agents.adaptive_replanning_agent import render_adaptive_replanning_agent
 from utils.state_persistence import load_state_from_cache, save_state_to_cache
 
 # Set page configuration
@@ -424,6 +426,12 @@ elif st.session_state.app_phase == "scheduling":
 
 elif st.session_state.app_phase == "progress_tracking":
     render_progress_agent()
+
+elif st.session_state.app_phase == "coaching":
+    render_coach_agent()
+
+elif st.session_state.app_phase == "replanning":
+    render_adaptive_replanning_agent()
 
 # Automatically save state to cache at the end of the script run
 save_state_to_cache()

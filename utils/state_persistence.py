@@ -28,7 +28,18 @@ PERSISTENT_KEYS = [
     "task_time_spent",
     "streak_count",
     "last_activity_date",
-    "weekly_reflections"
+    "weekly_reflections",
+    "weekly_schedule",
+    "daily_schedule",
+    "schedule_analysis",
+    "baseline_schedule",
+    "active_schedule",
+    "schedule_versions",
+    "current_schedule_version",
+    "replanned_schedule_preview",
+    "roadmap_health",
+    "completion_forecast",
+    "impact_analysis"
 ]
 
 def load_state_from_cache():

@@ -39,8 +39,14 @@ def auto_initialize_due_dates():
 
     # Map task ID to week number from weekly schedule if it exists
     task_weeks = {}
-    if "weekly_schedule" in st.session_state and st.session_state.weekly_schedule:
-        for week in st.session_state.weekly_schedule:
+    weekly_schedule = None
+    if "active_schedule" in st.session_state and st.session_state.active_schedule:
+        weekly_schedule = st.session_state["active_schedule"].get("weekly_schedule")
+    elif "weekly_schedule" in st.session_state:
+        weekly_schedule = st.session_state.weekly_schedule
+
+    if weekly_schedule:
+        for week in weekly_schedule:
             w_num = week.get("week_number", 1)
             for t in week.get("tasks", []):
                 t_id = t.get("task_id")
@@ -213,8 +219,14 @@ def calculate_metrics():
     
     # Weekly Velocity calculation: completed tasks / total weeks scheduled
     total_weeks = 1
-    if "weekly_schedule" in st.session_state and st.session_state.weekly_schedule:
-        total_weeks = max(1, len(st.session_state.weekly_schedule))
+    weekly_schedule = None
+    if "active_schedule" in st.session_state and st.session_state.active_schedule:
+        weekly_schedule = st.session_state["active_schedule"].get("weekly_schedule")
+    elif "weekly_schedule" in st.session_state:
+        weekly_schedule = st.session_state.weekly_schedule
+
+    if weekly_schedule:
+        total_weeks = max(1, len(weekly_schedule))
     elif "profile_data" in st.session_state:
         # fallback duration
         total_weeks = 4
@@ -291,6 +303,12 @@ def render_progress_agent():
         st.rerun()
     if st.sidebar.button("📅 Back to Scheduler Workspace", key="prog_nav_sched", use_container_width=True):
         st.session_state.app_phase = "scheduling"
+        st.rerun()
+    if st.sidebar.button("🧠 Consult AI Coach", key="prog_nav_coach", use_container_width=True):
+        st.session_state.app_phase = "coaching"
+        st.rerun()
+    if st.sidebar.button("🔄 Adaptive Replanning", key="prog_nav_replan", use_container_width=True):
+        st.session_state.app_phase = "replanning"
         st.rerun()
     st.sidebar.html("<hr style='border-color: rgba(255,255,255,0.1); margin: 15px 0;'>")
 

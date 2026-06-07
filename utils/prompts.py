@@ -862,6 +862,380 @@ def get_weekly_reflection_prompt(profile_data: dict, goal_context: dict, progres
     )
 
 
+def get_coaching_briefing_prompt(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    weekly_reflections: list
+) -> str:
+    """
+    Constructs a highly structured prompt to generate a cohesive coaching briefing JSON object.
+    """
+    # Profile
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    motivation_style = profile_data.get("motivation_style", "Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    # Goal
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    # Strategy
+    strategy_name = selected_strategy.get("name", "Balanced Growth")
+    strategy_desc = selected_strategy.get("description", "")
+    strategy_duration = selected_strategy.get("estimated_duration", "")
+
+    # Validation
+    v_scores = readiness_results.get("scores", {})
+    overall_readiness = v_scores.get("overall_readiness", 50)
+
+    # Schedule
+    weekly_sched = schedule_data.get("weekly_schedule", [])
+    schedule_analysis = schedule_data.get("schedule_analysis", {})
+    confidence_score = schedule_analysis.get("confidence_score", 80)
+    forecast = schedule_analysis.get("goal_completion_forecast", "")
+
+    # Progress Telemetry
+    health_score = progress_metrics.get("health_score", 100)
+    completion_rate = progress_metrics.get("overall_completion_pct", 0)
+    streak_count = progress_metrics.get("streak_count", 0)
+    overdue_count = progress_metrics.get("overdue_tasks_count", 0)
+    total_hours_spent = progress_metrics.get("total_hours_spent", 0.0)
+    completed_tasks = progress_metrics.get("completed_tasks", 0)
+    total_tasks = progress_metrics.get("total_tasks", 0)
+    overdue_tasks = ", ".join(progress_metrics.get("overdue_tasks_names", [])) or "None"
+
+    # Reflections
+    reflection_logs = ""
+    for idx, ref in enumerate(weekly_reflections[:3]):
+        timestamp = ref.get("timestamp", "N/A")
+        text = ref.get("reflection", "")
+        encouragement = ref.get("encouragement_quote", "")
+        reflection_logs += f"[{timestamp}] Reflection:\n{text}\nEncouragement Quote: {encouragement}\n\n"
+
+    return textwrap.dedent(
+        f"""
+        You are the ultimate AI Execution Coach for Agent OnboardX. Your mission is to analyze all telemetry, goal context, schedules, and progress details of a user to produce a highly personalized coaching brief and prepare state payloads for downstream agents.
+
+        === USER PROFILE & ARCHETYPE ===
+        - User Type: {user_type}
+        - Experience Level: {experience_level}
+        - Availability: {hours_per_week} hours/week
+        - Preference Work Style: {work_style}
+        - Motivation Driver: {motivation_style}
+        - Main obstacle: {biggest_challenge}
+
+        === GOAL & STRATEGY ===
+        - Goal: "{goal}" ({category} • {difficulty} level)
+        - Strategy Chosen: {strategy_name} ({strategy_desc})
+        - Strategy Target Duration: {strategy_duration}
+        - Strategy Readiness Audit Score: {overall_readiness}%
+
+        === EXECUTION SCHEDULE ===
+        - Total weeks scheduled: {len(weekly_sched)} weeks
+        - Confidence Score of Scheduler: {confidence_score}%
+        - Scheduler Timeline Forecast: {forecast}
+
+        === PROGRESS & TELEMETRY ===
+        - Current Execution Health: {health_score}/100
+        - Overall Goal Completion: {completion_rate}% ({completed_tasks}/{total_tasks} tasks done)
+        - Cumulative Hours Logged: {total_hours_spent} hours
+        - Active Streak: {streak_count} days
+        - Overdue Tasks Count: {overdue_count}
+        - Overdue Tasks list: {overdue_tasks}
+
+        === PAST COACH REFLECTIONS ===
+        {reflection_logs or "No past reflection logs found."}
+
+        === INSTRUCTIONS ===
+        You must perform a detailed analysis and generate a comprehensive JSON briefing. Every field should be customized to the user's specific context.
+
+        Required JSON Fields:
+        1. "daily_briefing": A concise, high-impact markdown paragraph outlining today's execution context. Focus on their current active week/sprint, task status, streak, and what they need to keep in mind today.
+        2. "weekly_summary": A high-level markdown overview of the current week's sprint theme, focus, and total task workload.
+        3. "progress_analysis": A markdown assessment of their speed, velocity, execution consistency, streak patterns, and hours logged vs initial estimates. Be analytical yet encouraging.
+        4. "risk_assessment": A markdown assessment of potential or active execution failures. Address any overdue tasks (e.g. {overdue_tasks}), energy drain risks, potential delay causes, or friction points related to their biggest obstacle ({biggest_challenge}).
+        5. "motivation_message": A highly personalized message tailored to their motivation style ({motivation_style}). Push them to execute today by linking their actions to their core driver.
+        6. "recommended_actions": A bulleted markdown list of 3-5 concrete, prioritized next action steps. Be extremely tactical and specific (e.g., specific tasks from their backlog to focus on).
+        7. "adaptive_replanning_payload": A structured JSON object for the Adaptive Replanning Agent:
+           - "risk_level": "low", "medium", or "high"
+           - "velocity_status": "on_track", "behind", or "ahead"
+           - "at_risk_tasks": Array of task IDs (e.g., T1_1) that are overdue or delayed
+           - "critical_delay_reason": A short string explaining why they are behind (or "None" if on track)
+           - "recommended_timeline_adjustment": "none", "extend_1_week", "reduce_daily_load", or "reallocate_hours"
+        8. "memory_payload": A structured JSON object for the Memory Agent:
+           - "key_learnings": Array of 2-3 key insights about the user's habit/work patterns
+           - "user_strengths_noted": Array of strengths observed during this session
+           - "sentiment_reflection": A short description of the user's morale or execution sentiment
+           - "session_summary": A summary of progress made in this session
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+        """
+    )
+
+
+def get_coaching_chat_prompt(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    weekly_reflections: list,
+    chat_history: list
+) -> str:
+    """
+    Constructs the prompt for the conversational coaching agent chat.
+    """
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    hours_per_week = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    motivation_style = profile_data.get("motivation_style", "Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    strategy_name = selected_strategy.get("name", "Balanced Growth")
+    strategy_duration = selected_strategy.get("estimated_duration", "")
+
+    health_score = progress_metrics.get("health_score", 100)
+    completion_rate = progress_metrics.get("overall_completion_pct", 0)
+    streak_count = progress_metrics.get("streak_count", 0)
+    overdue_count = progress_metrics.get("overdue_tasks_count", 0)
+    completed_tasks = progress_metrics.get("completed_tasks", 0)
+    total_tasks = progress_metrics.get("total_tasks", 0)
+    overdue_tasks = ", ".join(progress_metrics.get("overdue_tasks_names", [])) or "None"
+
+    # Format history
+    history_formatted = ""
+    for msg in chat_history[-10:]:
+        role = "User" if msg["role"] == "user" else "Coach"
+        history_formatted += f"{role}: {msg['content']}\n"
+
+    return textwrap.dedent(
+        f"""
+        You are the AI Execution Coach for Agent OnboardX. You are having a conversation with the user to help them execute their goals, debug their bottlenecks, and optimize their schedule.
+
+        === USER CONTEXT ===
+        - User Profile: {user_type} | {experience_level} level | {hours_per_week} hrs/week availability | {work_style} style | Main challenge: {biggest_challenge}
+        - Goal: "{goal}" ({category} • {difficulty} level)
+        - Selected Strategy: {strategy_name} (Timeline: {strategy_duration})
+        - Telemetry: Health {health_score}/100 | Completed: {completion_rate}% ({completed_tasks}/{total_tasks} tasks done) | Streak: {streak_count} days | Overdue: {overdue_count} tasks ({overdue_tasks})
+
+        === CONVERSATION HISTORY ===
+        {history_formatted}
+
+        === COACHING STYLE RULES ===
+        1. **Empathetic & Data-Driven**: Always refer to their actual telemetry (streaks, completion rate, overdue tasks) when answering their planning questions.
+        2. **Action-Oriented**: Focus responses on what they can do next. Suggest concrete steps.
+        3. **Archetype-Aware**: If they are a Beginner, explain things simply. If they are Advanced, dive straight into optimizations. Address their main challenge ({biggest_challenge}) when they are falling behind.
+        4. **Tone**: Direct, encouraging, friendly, and expert. Keep responses concise and formatted in clean markdown (paragraphs, bold text, bullet points). Do not make up tasks that do not exist in their backlog, refer only to the actual tasks if needed.
+
+        Answer the user's latest query now.
+        """
+    )
+
+
+def get_adaptive_replanning_prompt(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    coach_insights: dict,
+    new_hours_per_week: float,
+    replanning_mode: str
+) -> str:
+    """
+    Constructs a detailed prompt to invoke the Gemma 4 31B model for adaptive replanning.
+    """
+    user_type = profile_data.get("user_type", "Learner")
+    experience_level = profile_data.get("experience_level", "Beginner")
+    original_hours = profile_data.get("hours_per_week", 10)
+    work_style = profile_data.get("work_style", "Balanced Progress")
+    biggest_challenge = profile_data.get("biggest_challenge", "Inconsistent")
+
+    goal = goal_context.get("goal", "")
+    category = goal_context.get("category", "")
+    difficulty = goal_context.get("difficulty", "")
+
+    strategy_name = selected_strategy.get("name", "Balanced Growth")
+    strategy_duration = selected_strategy.get("estimated_duration", "")
+
+    # Progress Telemetry
+    health_score = progress_metrics.get("health_score", 100)
+    completion_rate = progress_metrics.get("overall_completion_pct", 0)
+    streak_count = progress_metrics.get("streak_count", 0)
+    overdue_count = progress_metrics.get("overdue_tasks_count", 0)
+    total_hours_spent = progress_metrics.get("total_hours_spent", 0.0)
+    completed_tasks_count = progress_metrics.get("completed_tasks", 0)
+    total_tasks_count = progress_metrics.get("total_tasks", 0)
+    overdue_tasks = ", ".join(progress_metrics.get("overdue_tasks_names", [])) or "None"
+
+    # Coach Insights
+    coach_briefing = coach_insights.get("daily_briefing", "") if coach_insights else ""
+    coach_risks = coach_insights.get("risk_assessment", "") if coach_insights else ""
+    coach_actions = coach_insights.get("recommended_actions", "") if coach_insights else ""
+
+    # Current roadmap and task list details
+    phases = roadmap_dag_data.get("phases", [])
+    current_schedule_weekly = schedule_data.get("weekly_schedule", [])
+
+    # Format the current tasks status (complete vs incomplete)
+    tasks_status_list = []
+    for phase in phases:
+        p_num = phase.get("phase_number", 1)
+        for task in phase.get("tasks", []):
+            t_id = task.get("task_id")
+            t_name = task.get("name")
+            t_hours = task.get("estimated_hours", 2)
+            t_deps = ", ".join(task.get("dependencies", [])) or "None"
+            
+            # Determine complete status
+            # Task is complete if all its subtask checkmarks are marked True in session_state.task_completions
+            subtasks = task.get("subtasks", [])
+            sub_keys = [f"{t_id}_{i}" for i in range(len(subtasks))]
+            is_completed = progress_metrics.get("task_statuses", {}).get(t_id) == "Completed"
+            
+            status_str = "Completed" if is_completed else "Incomplete"
+            tasks_status_list.append(
+                f"- [{t_id}] {t_name} (Phase {p_num} • {t_hours} hrs • Deps: {t_deps}) - Status: {status_str}"
+            )
+    tasks_status_formatted = "\n".join(tasks_status_list)
+
+    return textwrap.dedent(
+        f"""
+        You are the Adaptive Replanning Agent for Agent OnboardX. Your job is to analyze execution telemetry, detect delays or changes in constraints, and compute an optimized schedule update matching the user's selected replanning mode.
+
+        === USER PROFILE & COACHING CONTEXT ===
+        - Goal: "{goal}" ({category} • {difficulty} difficulty)
+        - User Archetype: {user_type} ({experience_level} level)
+        - Original Hours Available: {original_hours} hours/week
+        - Modified Hours Available Constraint: {new_hours_per_week} hours/week
+        - Work Style Preference: {work_style}
+        - Main obstacle/challenge: {biggest_challenge}
+        - Strategy Chosen: {strategy_name} (Base timeline: {strategy_duration})
+
+        === CURRENT PROGRESS TELEMETRY ===
+        - Goal Completion: {completion_rate}% ({completed_tasks_count}/{total_tasks_count} tasks completed)
+        - Active Streak: {streak_count} days
+        - Execution Health Score: {health_score}/100
+        - Cumulative Hours Logged: {total_hours_spent} hours
+        - Overdue Tasks: {overdue_tasks} ({overdue_count} tasks delayed)
+
+        === ACTIVE BACKLOG STATUS ===
+        {tasks_status_formatted}
+
+        === AI COACH FINDINGS ===
+        - Daily Briefing Summary: {coach_briefing}
+        - Risk Assessment Summary: {coach_risks}
+        - Recommended Tweak Actions: {coach_actions}
+
+        === REPLANNING CRITERIA & MODE ===
+        Selected Replanning Mode: **{replanning_mode}**
+
+        How to restructure the timeline and schedule based on the mode:
+        1. **Catch Up**:
+           - Keep the final target date identical.
+           - Compress the remaining schedule.
+           - You may allow weeks to slightly exceed the availability constraint of {new_hours_per_week} hours if necessary.
+           - Suggest parallelizing tasks that do not have strict sequential dependencies.
+        2. **Balanced**:
+           - Standard rescheduling.
+           - Distribute all remaining incomplete tasks evenly across subsequent weeks.
+           - Strictly respect the availability constraint of {new_hours_per_week} hours per week.
+           - Push out target dates proportionally if the remaining work exceeds availability.
+        3. **Low Stress**:
+           - Focus on execution safety and preventing burnout.
+           - Extend the timeline by 20-50% to build in larger weekly buffers.
+           - Cap weekly allocations well below {new_hours_per_week} hours (e.g. 70-80% of constraint).
+           - Distribute tasks into small daily blocks with rest buffers.
+        4. **Aggressive**:
+           - Target early completion.
+           - Compress the remaining sprint schedule into the minimum possible weeks.
+           - Maximize weekly allocations up to {new_hours_per_week} hours.
+           - Pull forward milestones and parallelize tasks where possible.
+
+        === TASK ===
+        Generate a replanned execution model.
+        1. Grade the overall `roadmap_health_score` (0-100) reflecting how safe/delinquent the plan is.
+        2. Grade the `completion_probability` (0-100) that the user will achieve this goal on the new timeline given their metrics.
+        3. Formulate a detailed weekly sprint plan (`replanned_weekly_schedule`) containing only the remaining **Incomplete** tasks. Note: Completed tasks should NOT be scheduled in the new weeks. Start the schedule at Week 1 for the remaining sprint duration.
+        4. Formulate the hourly daily task slots (`replanned_daily_schedule`) for the active workdays of those weeks, respecting the selected mode constraints.
+        5. Detail the risk analysis explaining detected bottlenecks and recommended timeline adjustments.
+        6. Package a downstream JSON payload (`memory_payload`) containing key learnings, adjustments made, user sentiment, and a summary.
+
+        Format your response as a single, valid JSON object. Do not include markdown code block wrappers (like ```json), do not include any explanatory text outside the JSON. Return only the raw JSON.
+
+        Required JSON structure:
+        {{
+            "roadmap_health_score": Integer (0 to 100),
+            "completion_probability": Integer (0 to 100),
+            "goal_completion_forecast": "String - e.g. 'Completed in 3 weeks, adjusted from 2 weeks'",
+            "risk_analysis": "String - detailed breakdown of bottlenecks, availability slips, and plan risks",
+            "recommended_adjustments": [
+                "Action adjustment 1",
+                "Action adjustment 2"
+            ],
+            "replanned_weekly_schedule": [
+                {{
+                    "week_number": Integer,
+                    "focus": "String sprint theme",
+                    "allocated_hours": Float,
+                    "tasks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "allocated_hours": Float
+                        }}
+                    ]
+                }}
+            ],
+            "replanned_daily_schedule": [
+                {{
+                    "week_number": Integer,
+                    "day_number": Integer,
+                    "day_name": "String",
+                    "total_hours": Float,
+                    "time_blocks": [
+                        {{
+                            "task_id": "String",
+                            "name": "String",
+                            "time_slot": "String - e.g. 09:00 AM - 11:00 AM",
+                            "duration_hours": Float,
+                            "type": "String"
+                        }}
+                    ]
+                }}
+            ],
+            "memory_payload": {{
+                "key_learnings": ["String insights about user's consistency/timeline slips"],
+                "user_strengths_noted": ["String strengths"],
+                "adjustments_made": "String summary of adjustments made",
+                "sentiment_reflection": "String - user confidence/burnout morale metrics",
+                "session_summary": "String summary of this replanning event"
+            }}
+        }}
+        """
+    )
+
+
+
+
 
 
 
