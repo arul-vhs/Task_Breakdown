@@ -1,1 +1,12 @@
 .env
+env
+.state_cache.json
+node_modules/
+.next/
+__pycache__/
+*.pyc
+env/
+venv/
+*.log
+backend/agent_onboardx.db
+project_codebase_dump.txt
