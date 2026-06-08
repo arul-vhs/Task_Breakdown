@@ -10,7 +10,12 @@ from utils.prompts import (
     get_strategy_readiness_evaluation_prompt,
     get_execution_blueprint_prompt,
     get_task_breakdown_prompt,
-    get_roadmap_dag_prompt
+    get_roadmap_dag_prompt,
+    get_scheduling_prompt,
+    get_weekly_reflection_prompt,
+    get_coaching_briefing_prompt,
+    get_coaching_chat_prompt,
+    get_adaptive_replanning_prompt
 )
 
 # Load environment variables on startup
@@ -161,17 +166,7 @@ def generate_strategies_with_gemini(goal_context: dict, profile_data: dict, pers
         return result
         
     except Exception as e:
-        try:
-            # Fallback to gemini-1.5-flash
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Strategy Generation Failed. Primary (gemma-4-31b-it) error: {str(e)}. Fallback (gemini-1.5-flash) error: {str(fallback_e)}")
+        raise Exception(f"Strategy Generation Failed: {str(e)}")
 
 
 def generate_validation_questions_with_gemini(profile_data: dict, goal_context: dict, strategy: dict, api_key: str) -> dict:
@@ -193,16 +188,7 @@ def generate_validation_questions_with_gemini(profile_data: dict, goal_context: 
         result = extract_json_from_text(response.text)
         return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Validation Questions Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+        raise Exception(f"Validation Questions Generation Failed: {str(e)}")
 
 
 def evaluate_strategy_readiness_with_gemini(profile_data: dict, goal_context: dict, strategy: dict, qa_list: list, api_key: str) -> dict:
@@ -224,16 +210,7 @@ def evaluate_strategy_readiness_with_gemini(profile_data: dict, goal_context: di
         result = extract_json_from_text(response.text)
         return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Readiness Evaluation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+        raise Exception(f"Readiness Evaluation Failed: {str(e)}")
 
 
 def generate_execution_blueprint_with_gemini(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, refinement_choice: str, api_key: str) -> dict:
@@ -255,16 +232,7 @@ def generate_execution_blueprint_with_gemini(profile_data: dict, goal_context: d
         result = extract_json_from_text(response.text)
         return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Execution Blueprint Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+        raise Exception(f"Execution Blueprint Generation Failed: {str(e)}")
 
 
 def generate_task_breakdown_with_gemini(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, blueprint: dict, depth: str, api_key: str) -> dict:
@@ -286,16 +254,7 @@ def generate_task_breakdown_with_gemini(profile_data: dict, goal_context: dict, 
         result = extract_json_from_text(response.text)
         return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Task Breakdown Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+        raise Exception(f"Task Breakdown Generation Failed: {str(e)}")
 
 
 def generate_roadmap_dag_with_gemini(profile_data: dict, goal_context: dict, strategy: dict, validation_results: dict, refinement_choice: str, depth: str, api_key: str) -> dict:
@@ -317,18 +276,175 @@ def generate_roadmap_dag_with_gemini(profile_data: dict, goal_context: dict, str
         result = extract_json_from_text(response.text)
         return result
     except Exception as e:
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            result = extract_json_from_text(response.text)
-            return result
-        except Exception as fallback_e:
-            raise Exception(f"Roadmap & DAG Generation Failed. Primary error: {str(e)}. Fallback error: {str(fallback_e)}")
+        raise Exception(f"Roadmap & DAG Generation Failed: {str(e)}")
 
 
+def generate_schedule_with_gemini(profile_data: dict, goal_context: dict, selected_strategy: dict, roadmap_dag_data: dict, api_key: str) -> dict:
+    """
+    Calls Gemini to generate a weekly and daily schedule.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_scheduling_prompt(profile_data, goal_context, selected_strategy, roadmap_dag_data)
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        raise Exception(f"Scheduling Generation Failed: {str(e)}")
 
+
+def generate_weekly_reflection_with_gemini(profile_data: dict, goal_context: dict, progress_summary: dict, api_key: str) -> dict:
+    """
+    Calls Gemini to generate a weekly coaching reflection based on execution progress.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_weekly_reflection_prompt(profile_data, goal_context, progress_summary)
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        raise Exception(f"Weekly Reflection Generation Failed: {str(e)}")
+
+
+def generate_coaching_dashboard_with_gemini(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    weekly_reflections: list,
+    api_key: str
+) -> dict:
+    """
+    Calls Gemini to generate the 6 structured coaching outputs and structured payload.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key in your .env or sidebar.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_coaching_briefing_prompt(
+        profile_data,
+        goal_context,
+        selected_strategy,
+        readiness_results,
+        roadmap_dag_data,
+        schedule_data,
+        progress_metrics,
+        weekly_reflections
+    )
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        raise Exception(f"Coaching Dashboard Generation Failed: {str(e)}")
+
+
+def chat_with_coach_agent(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    weekly_reflections: list,
+    chat_history: list,
+    api_key: str
+) -> str:
+    """
+    Calls Gemini in a conversational loop to answer coach chat prompts.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key in your .env or sidebar.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_coaching_chat_prompt(
+        profile_data,
+        goal_context,
+        selected_strategy,
+        readiness_results,
+        roadmap_dag_data,
+        schedule_data,
+        progress_metrics,
+        weekly_reflections,
+        chat_history
+    )
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        raise Exception(f"Coaching Chat Failed: {str(e)}")
+
+
+def generate_replanned_roadmap_with_gemini(
+    profile_data: dict,
+    goal_context: dict,
+    selected_strategy: dict,
+    readiness_results: dict,
+    roadmap_dag_data: dict,
+    schedule_data: dict,
+    progress_metrics: dict,
+    coach_insights: dict,
+    new_hours_per_week: float,
+    replanning_mode: str,
+    api_key: str
+) -> dict:
+    """
+    Calls Gemini using the Gemma 4 31B model to calculate a new schedule.
+    """
+    if not api_key:
+        raise ValueError("Gemini API Key is missing. Please provide a key in your .env or sidebar.")
+        
+    genai.configure(api_key=api_key)
+    prompt = get_adaptive_replanning_prompt(
+        profile_data,
+        goal_context,
+        selected_strategy,
+        readiness_results,
+        roadmap_dag_data,
+        schedule_data,
+        progress_metrics,
+        coach_insights,
+        new_hours_per_week,
+        replanning_mode
+    )
+    
+    try:
+        model = genai.GenerativeModel("models/gemma-4-31b-it")
+        response = model.generate_content(
+            prompt,
+            generation_config={"response_mime_type": "application/json"}
+        )
+        result = extract_json_from_text(response.text)
+        return result
+    except Exception as e:
+        raise Exception(f"Adaptive Replanning Failed: {str(e)}")
 
 
