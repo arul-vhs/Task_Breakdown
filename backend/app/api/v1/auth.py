@@ -1,85 +1,70 @@
 import uuid
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr, Field
 from app.database.session import get_db
-from app.repositories import user_repo
-from app.security.jwt_handler import create_access_token, create_refresh_token
-from app.security.hashing import verify_password
-from app.api.deps import get_current_user
-from app.models.models import User
-from app.config import settings
+from app.repositories.user_repository import UserRepository
+from app.security.jwt import create_access_token, create_refresh_token
+from app.security.password import verify_password
+from app.security.auth import get_current_user
+from app.models.user import User
+from app.core.limiter import limiter
+from app.core.logger import logger, update_log_context
+from app.schemas.auth import (
+    UserRegister,
+    UserResponse,
+    TokenResponse,
+    ProfileUpdate,
+    ProfileResponse
+)
 
 router = APIRouter()
-
-# ==========================================
-# Schema Definitions
-# ==========================================
-class UserRegister(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
-
-class UserResponse(BaseModel):
-    id: uuid.UUID
-    email: str
-
-    class Config:
-        from_attributes = True
-
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-
-class ProfileUpdate(BaseModel):
-    role: str = Field(..., description="Student, Founder, Working Professional, Freelancer, Job Seeker")
-    work_style: str = Field(..., description="Morning, Evening, Pomodoro, Deep Work")
-    weekly_hours_available: float = Field(..., ge=1.0, le=168.0)
-    biggest_challenge: str = None
-    full_name: str = None
-
-class ProfileResponse(BaseModel):
-    id: uuid.UUID
-    user_id: uuid.UUID
-    role: str
-    work_style: str
-    weekly_hours_available: float
-    biggest_challenge: str = None
-    full_name: str = None
-
-    class Config:
-        from_attributes = True
 
 # ==========================================
 # Authentication Endpoints
 # ==========================================
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def register(data: UserRegister, db: Session = Depends(get_db)):
+@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("5/minute")
+def signup(request: Request, data: UserRegister, db: Session = Depends(get_db)):
     """
-    Registers a new user account.
+    Registers a new user account (Signup).
     """
-    db_user = user_repo.get_user_by_email(db, data.email)
+    update_log_context({"event": "user_signup_attempt", "email": data.email})
+    logger.info(f"Attempting user signup for {data.email}")
+    
+    user_repo = UserRepository(db)
+    db_user = user_repo.get_by_email(data.email)
     if db_user:
+        logger.warning(f"Signup failed: email {data.email} already registered.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email address already registered."
         )
-    user = user_repo.create_user(db, data.email, data.password)
+    user = user_repo.create(data.email, data.password)
+    
+    update_log_context({"event": "user_signup_success", "user_id": str(user.id)})
+    logger.info(f"User signup successful: {user.id}")
     return user
 
-@router.post("/token", response_model=TokenResponse)
-def login_for_access_token(
+@router.post("/login", response_model=TokenResponse)
+@limiter.limit("10/minute")
+def login(
+    request: Request,
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
     """
-    Exchanges credentials (username/password) for access and refresh tokens.
+    Authenticates username/password and yields Access/Refresh JWTs (Login).
     """
-    user = user_repo.get_user_by_email(db, form_data.username)
+    update_log_context({"event": "user_login_attempt", "email": form_data.username})
+    logger.info(f"Attempting user login for {form_data.username}")
+    
+    user_repo = UserRepository(db)
+    user = user_repo.get_by_email(form_data.username)
     if not user or not verify_password(form_data.password, user.hashed_password):
+        logger.warning(f"Login failed for user: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password.",
@@ -88,6 +73,10 @@ def login_for_access_token(
     
     access_token = create_access_token(subject=user.id)
     refresh_token = create_refresh_token(subject=user.id)
+    
+    update_log_context({"event": "user_login_success", "user_id": str(user.id)})
+    logger.info(f"User login successful: {user.id}")
+    
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -102,6 +91,18 @@ def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 # ==========================================
+# Legacy/Backward Compatibility Routes
+# ==========================================
+
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def register_legacy(request: Request, data: UserRegister, db: Session = Depends(get_db)):
+    return signup(request, data, db)
+
+@router.post("/token", response_model=TokenResponse)
+def login_legacy(request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+    return login(request, db, form_data)
+
+# ==========================================
 # Profile/Onboarding Endpoints
 # ==========================================
 
@@ -114,8 +115,8 @@ def update_profile(
     """
     Creates or updates the user onboarding profile characteristics.
     """
+    user_repo = UserRepository(db)
     profile = user_repo.create_or_update_profile(
-        db=db,
         user_id=current_user.id,
         role=data.role,
         work_style=data.work_style,
@@ -133,7 +134,8 @@ def get_user_profile(
     """
     Retrieves the user's active profile metadata.
     """
-    profile = user_repo.get_profile(db, current_user.id)
+    user_repo = UserRepository(db)
+    profile = user_repo.get_profile(current_user.id)
     if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

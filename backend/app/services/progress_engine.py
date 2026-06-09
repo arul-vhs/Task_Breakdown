@@ -1,7 +1,9 @@
 import datetime
+import uuid
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
-from app.models.models import Task, ProgressLog
-from app.repositories import goal_repo
+from app.models.task import Task
+from app.models.progress import ProgressLog
 
 class ProgressEngine:
     def __init__(self):
@@ -46,8 +48,27 @@ class ProgressEngine:
         # Health calculation: starts at 100, drops by 10 per overdue task, bounded to 0-100
         health_score = max(0, 100 - (overdue_count * 10))
         
-        # Streak calculations
-        streak = goal_repo.get_streak_count(db, user_id)
+        # Streak calculations (done inline to prevent import conflicts with legacy models.models)
+        user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+        logs = db.query(ProgressLog.logged_date).filter(
+            and_(ProgressLog.user_id == user_uuid, ProgressLog.action == "completed")
+        ).distinct().order_by(ProgressLog.logged_date.desc()).all()
+        
+        streak = 0
+        if logs:
+            dates = [row[0] for row in logs]
+            yesterday = today - datetime.timedelta(days=1)
+            
+            # Check if user did something today or yesterday to continue streak
+            if dates[0] in (today, yesterday):
+                streak = 1
+                current_date = dates[0]
+                for next_date in dates[1:]:
+                    if current_date - next_date == datetime.timedelta(days=1):
+                        streak += 1
+                        current_date = next_date
+                    else:
+                        break
         
         # Hours spent vs allocated
         time_spent_total = sum(float(t.time_spent) for t in tasks)

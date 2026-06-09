@@ -1,16 +1,11 @@
 {
-    "app_phase": "strategy_generation",
+    "app_phase": "profiling",
     "onboarding_started": true,
-    "current_step": 6,
+    "current_step": 1,
     "profile_data": {
-        "user_type": "Developer",
-        "experience_level": "Intermediate",
-        "hours_per_week": 19.0,
-        "work_style": "Quick Wins",
-        "motivation_style": "Achievements",
-        "biggest_challenge": "Lack of Time"
+        "user_type": "Student"
     },
-    "completed": true,
+    "completed": false,
     "goal_submitted": true,
     "goal_analysis": {
         "category": "Robotics and Artificial Intelligence",
@@ -89,7 +84,7 @@
         ],
         "timestamp": "2026-06-06T16:24:13"
     },
-    "custom_api_key": "AQ.Ab8RN6Kf5hjhCtbXK2v3i8JAwCq4lmIEfFs82I8tnSHL3RGYwg",
+    "custom_api_key": "AQ.Ab8RN6JDPTKNbqqHpjl4047Y0K_g0jEYAFxyYXHHIYvgRnztDQ",
     "selected_strategy_data": {
         "key": "fast_mvp",
         "name": "Digital Persona Prototype",

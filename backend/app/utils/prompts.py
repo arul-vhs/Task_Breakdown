@@ -1092,7 +1092,13 @@ def get_adaptive_replanning_prompt(
     coach_actions = coach_insights.get("recommended_actions", "") if coach_insights else ""
 
     # Current roadmap and task list details
-    phases = roadmap_dag_data.get("phases", [])
+    phases = roadmap_dag_data.get("phases")
+    if phases is None:
+        phases = roadmap_dag_data.get("tasks_by_phase", [])
+    if not isinstance(phases, list):
+        raise ValueError(
+            f"Expected phases list, got {type(phases).__name__}"
+        )
     current_schedule_weekly = schedule_data.get("weekly_schedule", [])
 
     # Format the current tasks status (complete vs incomplete)

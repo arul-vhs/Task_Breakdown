@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals-compiled.css';
+import { Providers } from '../components/providers';
 
 export const metadata: Metadata = {
   title: 'Agent OnboardX - AI Goal Operating System',
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="antialiased min-h-screen bg-[#0b0f19]">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

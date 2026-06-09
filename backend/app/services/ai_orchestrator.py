@@ -145,7 +145,18 @@ class AIOrchestrator:
         return response.text
 
     def generate_replanned_preview(self, profile: dict, goal_context: dict, selected_strategy: dict, readiness_results: dict, roadmap_dag_data: dict, schedule_data: dict, progress_metrics: dict, coach_insights: dict, new_hours_per_week: float, replanning_mode: str) -> dict:
-        prompt = get_adaptive_replanning_prompt(profile, goal_context, selected_strategy, readiness_results, roadmap_dag_data, schedule_data, progress_metrics, coach_insights, new_hours_per_week, replanning_mode)
+        prompt = get_adaptive_replanning_prompt(
+            profile_data=profile,
+            goal_context=goal_context,
+            selected_strategy=selected_strategy,
+            readiness_results=readiness_results,
+            roadmap_dag_data=roadmap_dag_data,
+            schedule_data=schedule_data,
+            progress_metrics=progress_metrics,
+            coach_insights=coach_insights,
+            new_hours_per_week=new_hours_per_week,
+            replanning_mode=replanning_mode
+        )
         model = self._get_model()
         response = model.generate_content(
             prompt,
