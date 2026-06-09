@@ -1,0 +1,8 @@
+STAGE_GOAL_ANALYSIS = "goal_analysis"
+STAGE_STRATEGY_SELECTION = "strategy_selection"
+STAGE_VALIDATION = "validation"
+STAGE_ROADMAP = "roadmap_generation"
+STAGE_SCHEDULING = "scheduling"
+STAGE_EXECUTION = "execution"
+STAGE_COACHING = "coaching"
+STAGE_REPLANNING = "replanning"
